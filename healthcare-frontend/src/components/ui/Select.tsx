@@ -4,14 +4,14 @@ import { cn } from '../../lib/utils';
 import { ChevronDown } from 'lucide-react';
 
 export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  label: string;
+  label?: string;
   error?: string;
   options: { label: string; value: string | number }[];
 }
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, error, className, id, options, ...props }, ref) => {
-    const selectId = id ?? label.toLowerCase().replace(/\s+/g, '-');
+    const selectId = id ?? (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
 
     return (
       <motion.div 
@@ -24,32 +24,35 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             ref={ref}
             id={selectId}
             className={cn(
-              'peer w-full h-14 rounded-lg border bg-transparent px-4 pt-4 pb-1 text-ink font-body transition-all duration-150 appearance-none',
+              'peer w-full rounded-lg border bg-transparent px-4 text-ink font-body transition-all duration-150 appearance-none',
+              label ? 'h-14 pt-4 pb-1' : 'h-11 py-2',
               'focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent',
               error ? 'border-danger focus:ring-danger/50 focus:border-danger' : 'border-ink/10 hover:border-ink/20',
               className
             )}
             {...props}
           >
-            <option value="" disabled hidden></option>
+            {label && <option value="" disabled hidden></option>}
             {options.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
           <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink/40 pointer-events-none" />
-          <label
-            htmlFor={selectId}
-            className={cn(
-              'absolute left-4 top-4 z-10 origin-[0] -translate-y-3 scale-75 transform font-body text-ink/50 duration-150 pointer-events-none',
-              'peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100',
-              'peer-focus:-translate-y-3 peer-focus:scale-75 peer-focus:text-accent',
-              /* Because selects don't use placeholder shown properly, we always keep the label floated */
-              'translate-y-[-0.75rem] scale-75',
-              error && 'text-danger peer-focus:text-danger'
-            )}
-          >
-            {label}
-          </label>
+          {label && (
+            <label
+              htmlFor={selectId}
+              className={cn(
+                'absolute left-4 top-4 z-10 origin-[0] -translate-y-3 scale-75 transform font-body text-ink/50 duration-150 pointer-events-none',
+                'peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100',
+                'peer-focus:-translate-y-3 peer-focus:scale-75 peer-focus:text-accent',
+                /* Because selects don't use placeholder shown properly, we always keep the label floated */
+                'translate-y-[-0.75rem] scale-75',
+                error && 'text-danger peer-focus:text-danger'
+              )}
+            >
+              {label}
+            </label>
+          )}
         </div>
         
         <AnimatePresence>

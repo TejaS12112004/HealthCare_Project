@@ -4,14 +4,14 @@ import { Eye, EyeOff } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
+  label?: string;
   error?: string;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, className, id, type, value, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false);
-    const inputId = id ?? label.toLowerCase().replace(/\s+/g, '-');
+    const inputId = id ?? (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
     
     const isPassword = type === 'password';
     const inputType = isPassword ? (showPassword ? 'text' : 'password') : type;
@@ -28,26 +28,29 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             type={inputType}
             className={cn(
-              'peer w-full h-14 rounded-lg border bg-transparent px-4 pt-4 pb-1 text-ink font-body transition-all duration-150',
+              'peer w-full rounded-lg border bg-transparent px-4 text-ink font-body transition-all duration-150',
+              label ? 'h-14 pt-4 pb-1' : 'h-11 py-2',
               'focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent',
               error ? 'border-danger focus:ring-danger/50 focus:border-danger' : 'border-ink/10 hover:border-ink/20',
               className
             )}
-            placeholder=" " // Required for peer-placeholder-shown
+            placeholder={label ? " " : props.placeholder} // Required for peer-placeholder-shown when label exists
             value={value}
             {...props}
           />
-          <label
-            htmlFor={inputId}
-            className={cn(
-              'absolute left-4 top-4 z-10 origin-[0] -translate-y-3 scale-75 transform font-body text-ink/50 duration-150 pointer-events-none',
-              'peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100',
-              'peer-focus:-translate-y-3 peer-focus:scale-75 peer-focus:text-accent',
-              error && 'text-danger peer-focus:text-danger'
-            )}
-          >
-            {label}
-          </label>
+          {label && (
+            <label
+              htmlFor={inputId}
+              className={cn(
+                'absolute left-4 top-4 z-10 origin-[0] -translate-y-3 scale-75 transform font-body text-ink/50 duration-150 pointer-events-none',
+                'peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100',
+                'peer-focus:-translate-y-3 peer-focus:scale-75 peer-focus:text-accent',
+                error && 'text-danger peer-focus:text-danger'
+              )}
+            >
+              {label}
+            </label>
+          )}
 
           {isPassword && (
             <button

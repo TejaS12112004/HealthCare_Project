@@ -1,5 +1,4 @@
-import { Heart, Activity, Globe, MessageCircle, Mail } from 'lucide-react';
-import { MagneticButton } from '../lib/motion/MagneticButton';
+import { Globe, MessageCircle, Mail } from 'lucide-react';
 
 export const Footer = () => {
   return (

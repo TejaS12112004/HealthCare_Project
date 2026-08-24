@@ -17,7 +17,6 @@ import { Spinner } from '../../components/ui/Spinner';
 import { Card } from '../../components/ui/Card';
 import { useToast } from '../../contexts/ToastContext';
 import { Reveal } from '../../lib/motion/Reveal';
-import { cn } from '../../lib/utils';
 
 const prescriptionSchema = z.object({
   medicationName: z.string().min(2, "Required"),

@@ -60,22 +60,28 @@ export const ChangePasswordModal: React.FC<Props> = ({ isOpen, onClose }) => {
           </div>
         )}
         
-        <div>
-          <label className="text-xs font-medium text-slate-400">Old Password *</label>
-          <Input type="password" {...register('oldPassword')} error={errors.oldPassword?.message} />
-        </div>
+        <Input 
+          type="password" 
+          label="Old Password *" 
+          {...register('oldPassword')} 
+          error={errors.oldPassword?.message} 
+        />
         
-        <div>
-          <label className="text-xs font-medium text-slate-400">New Password *</label>
-          <Input type="password" {...register('newPassword')} error={errors.newPassword?.message} />
-        </div>
+        <Input 
+          type="password" 
+          label="New Password *" 
+          {...register('newPassword')} 
+          error={errors.newPassword?.message} 
+        />
         
-        <div>
-          <label className="text-xs font-medium text-slate-400">Confirm New Password *</label>
-          <Input type="password" {...register('confirmPassword')} error={errors.confirmPassword?.message} />
-        </div>
+        <Input 
+          type="password" 
+          label="Confirm New Password *" 
+          {...register('confirmPassword')} 
+          error={errors.confirmPassword?.message} 
+        />
         
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+        <div className="flex justify-end gap-3 pt-4 border-t border-ink/5">
           <Button type="button" variant="secondary" onClick={handleClose}>Cancel</Button>
           <Button type="submit" isLoading={isPending}>Save Password</Button>
         </div>

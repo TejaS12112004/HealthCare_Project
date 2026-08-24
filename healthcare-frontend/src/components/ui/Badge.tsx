@@ -1,7 +1,22 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
 
-type BadgeVariant = 'success' | 'warning' | 'danger' | 'neutral' | 'accent' | 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
+type BadgeVariant = 
+  | 'success' 
+  | 'warning' 
+  | 'danger' 
+  | 'neutral' 
+  | 'accent' 
+  | 'PENDING' 
+  | 'CONFIRMED' 
+  | 'COMPLETED' 
+  | 'CANCELLED' 
+  | 'RESCHEDULED'
+  | 'HOLD'
+  | 'HIGH'
+  | 'MEDIUM'
+  | 'LOW'
+  | (string & {});
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: BadgeVariant;
@@ -9,10 +24,10 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 export const Badge: React.FC<BadgeProps> = ({ variant = 'neutral', className, children, ...props }) => {
   let mappedVariant = variant;
-  if (variant === 'PENDING') mappedVariant = 'warning';
-  if (variant === 'CONFIRMED') mappedVariant = 'accent';
-  if (variant === 'COMPLETED') mappedVariant = 'success';
-  if (variant === 'CANCELLED') mappedVariant = 'danger';
+  if (variant === 'PENDING' || variant === 'MEDIUM' || variant === 'HOLD') mappedVariant = 'warning';
+  if (variant === 'CONFIRMED' || variant === 'RESCHEDULED') mappedVariant = 'accent';
+  if (variant === 'COMPLETED' || variant === 'LOW') mappedVariant = 'success';
+  if (variant === 'CANCELLED' || variant === 'HIGH') mappedVariant = 'danger';
 
   const variants: Record<string, string> = {
     success: 'bg-success/10 text-success border-success/20',
