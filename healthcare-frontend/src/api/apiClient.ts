@@ -2,8 +2,14 @@ import axios from 'axios';
 
 const ACCESS_TOKEN_KEY = 'hc_access_token';
 
+const getBaseUrl = () => {
+  const url = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || '';
+  // Ensure no trailing slash
+  return url.endsWith('/') ? url.slice(0, -1) : url;
+};
+
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? '',
+  baseURL: getBaseUrl(),
   headers: { 'Content-Type': 'application/json' },
 });
 
