@@ -5,6 +5,7 @@ import { useAdminDoctors, useDoctorLeave, useMarkLeave, useRemoveLeave } from '.
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
+import { Card } from '../../components/ui/Card';
 import { Spinner } from '../../components/ui/Spinner';
 import { Reveal } from '../../lib/motion/Reveal';
 import { cn } from '../../lib/utils';
@@ -77,20 +78,20 @@ export const AdminLeave: React.FC = () => {
     <div className="space-y-8 max-w-5xl mx-auto p-8">
       <Reveal>
         <div>
-          <h1 className="text-3xl text-primary mb-2">Leave Management</h1>
-          <p className="text-slate-500 font-medium">Manage doctor absences and automatically notify affected patients.</p>
+          <h1 className="text-3xl text-ink font-display mb-2">Leave Management</h1>
+          <p className="text-ink/60 font-body">Manage doctor absences and automatically notify affected patients.</p>
         </div>
       </Reveal>
 
       <Reveal delay={0.1}>
-        <div className="bg-surface border border-primary/5 rounded-2xl p-8 shadow-multi">
+        <Card>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
             <div className="w-full md:w-80">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Select Doctor</label>
+              <label className="block text-xs font-bold text-ink/50 uppercase tracking-wider mb-2">Select Doctor</label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-ink/40" />
                 <select 
-                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-primary/10 bg-background text-sm font-medium text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent appearance-none transition-colors"
+                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-ink/10 bg-bg text-sm font-medium text-ink focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent appearance-none transition-colors"
                   value={selectedDoctorId}
                   onChange={(e) => setSelectedDoctorId(e.target.value)}
                 >
@@ -103,27 +104,27 @@ export const AdminLeave: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-4">
-              <button onClick={handlePrevMonth} className="p-2 bg-background border border-primary/5 rounded-xl hover:bg-primary/5 text-primary transition-colors">
+              <button onClick={handlePrevMonth} className="p-2 bg-bg border border-ink/5 rounded-xl hover:bg-ink/5 text-ink transition-colors">
                 <ChevronLeft className="h-5 w-5" />
               </button>
-              <h2 className="text-xl text-primary font-bold w-40 text-center">
+              <h2 className="text-xl text-ink font-bold w-40 text-center font-display">
                 {format(currentDate, 'MMMM yyyy')}
               </h2>
-              <button onClick={handleNextMonth} className="p-2 bg-background border border-primary/5 rounded-xl hover:bg-primary/5 text-primary transition-colors">
+              <button onClick={handleNextMonth} className="p-2 bg-bg border border-ink/5 rounded-xl hover:bg-ink/5 text-ink transition-colors">
                 <ChevronRight className="h-5 w-5" />
               </button>
             </div>
           </div>
 
           {selectedDoctorId ? (
-            <div className="border border-primary/10 rounded-2xl overflow-hidden bg-background relative shadow-sm">
+            <div className="border border-ink/10 rounded-2xl overflow-hidden bg-bg relative shadow-sm">
               {isLoadingLeaves && (
-                <div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
+                <div className="absolute inset-0 bg-bg/50 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
                   <Spinner />
                 </div>
               )}
               
-              <div className="grid grid-cols-7 border-b border-primary/10 text-center text-xs font-bold text-slate-500 uppercase tracking-wider py-4 bg-surface">
+              <div className="grid grid-cols-7 border-b border-ink/10 text-center text-xs font-bold text-ink/50 uppercase tracking-wider py-4 bg-surface">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
                   <div key={day}>{day}</div>
                 ))}
@@ -141,22 +142,22 @@ export const AdminLeave: React.FC = () => {
                       key={dateStr}
                       onClick={() => isCurrentMonth && handleDateClick(day)}
                       className={cn(
-                        "border-b border-r border-primary/5 p-2 relative transition-all duration-200",
-                        !isCurrentMonth ? "bg-background opacity-40 cursor-default" : "bg-surface hover:bg-surface-hover cursor-pointer",
+                        "border-b border-r border-ink/5 p-2 relative transition-all duration-200",
+                        !isCurrentMonth ? "bg-bg opacity-40 cursor-default" : "bg-surface hover:bg-accent/5 cursor-pointer",
                         i % 7 === 6 && "border-r-0",
-                        isLeave && "bg-red-50 hover:bg-red-100"
+                        isLeave && "bg-danger/10 hover:bg-danger/20"
                       )}
                     >
                       <span className={cn(
                         "inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium",
-                        isToday ? "bg-accent text-white font-bold shadow-md shadow-accent/20" : (isCurrentMonth ? "text-primary" : "text-slate-400"),
-                        isLeave && !isToday && "text-red-600 font-bold"
+                        isToday ? "bg-accent text-white font-bold shadow-md shadow-accent/20" : (isCurrentMonth ? "text-ink" : "text-ink/40"),
+                        isLeave && !isToday && "text-danger font-bold"
                       )}>
                         {format(day, 'd')}
                       </span>
                       
                       {isLeave && (
-                        <div className="absolute bottom-2 left-2 right-2 rounded-lg bg-red-100 border border-red-200 px-1 py-1 text-[10px] font-bold text-red-600 text-center truncate shadow-sm">
+                        <div className="absolute bottom-2 left-2 right-2 rounded-lg bg-danger/10 border border-danger/20 px-1 py-1 text-[10px] font-bold text-danger text-center truncate shadow-sm">
                           On Leave
                         </div>
                       )}
@@ -166,43 +167,42 @@ export const AdminLeave: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="py-24 text-center border-2 border-dashed border-primary/10 rounded-2xl bg-background/50">
-              <Calendar className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-              <p className="text-slate-500 font-medium">Select a doctor to manage their leave schedule.</p>
+            <div className="py-24 text-center border-2 border-dashed border-ink/10 rounded-2xl bg-bg/50">
+              <Calendar className="h-12 w-12 text-ink/20 mx-auto mb-4" />
+              <p className="text-ink/50 font-medium">Select a doctor to manage their leave schedule.</p>
             </div>
           )}
-        </div>
+        </Card>
       </Reveal>
 
       <Modal isOpen={isMarkLeaveModalOpen} onClose={() => setIsMarkLeaveModalOpen(false)} title="Mark Leave Day">
         <form onSubmit={handleMarkLeave} className="space-y-6">
           <div>
-            <p className="text-slate-600 font-medium leading-relaxed">
-              Mark <strong className="text-primary font-bold">{selectedDate && format(selectedDate, 'MMM d, yyyy')}</strong> as a leave day.
+            <p className="text-ink/60 font-medium leading-relaxed">
+              Mark <strong className="text-ink font-bold">{selectedDate && format(selectedDate, 'MMM d, yyyy')}</strong> as a leave day.
               This will automatically cancel any existing appointments on this day and notify the patients via email.
             </p>
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Reason (Optional)</label>
-            <Input value={leaveReason} onChange={(e) => setLeaveReason(e.target.value)} placeholder="e.g. Sick Leave, Vacation" />
+            <Input label="Reason (Optional)" value={leaveReason} onChange={(e) => setLeaveReason(e.target.value)} placeholder="e.g. Sick Leave, Vacation" />
           </div>
-          <div className="flex justify-end gap-3 pt-6 border-t border-primary/10">
+          <div className="flex justify-end gap-3 pt-6 border-t border-ink/5">
             <Button type="button" variant="secondary" onClick={() => setIsMarkLeaveModalOpen(false)}>Cancel</Button>
-            <Button type="submit" variant="danger" isLoading={isMarking}>Confirm & Mark Leave</Button>
+            <Button type="submit" variant="destructive" isLoading={isMarking}>Confirm & Mark Leave</Button>
           </div>
         </form>
       </Modal>
 
       <Modal isOpen={!!affectedAppointmentsModal} onClose={() => setAffectedAppointmentsModal(null)} title="Leave Marked Successfully">
         <div className="space-y-6">
-          <p className="text-slate-600 font-medium leading-relaxed">
-            Leave has been scheduled. The following <strong className="text-primary font-bold">{affectedAppointmentsModal?.length}</strong> appointments have been cancelled, and cancellation emails have been queued.
+          <p className="text-ink/60 font-medium leading-relaxed">
+            Leave has been scheduled. The following <strong className="text-ink font-bold">{affectedAppointmentsModal?.length}</strong> appointments have been cancelled, and cancellation emails have been queued.
           </p>
-          <div className="bg-background border border-primary/5 rounded-xl p-4 max-h-60 overflow-y-auto space-y-2">
+          <div className="bg-bg border border-ink/5 rounded-xl p-4 max-h-60 overflow-y-auto space-y-2">
             {affectedAppointmentsModal?.map((apt: any) => (
-              <div key={apt.id} className="flex justify-between items-center py-2 border-b border-primary/5 last:border-0">
-                <span className="text-primary font-bold">{apt.patientName}</span>
-                <span className="text-slate-500 font-medium">{apt.slotTime && format(parseISO(apt.slotTime), 'h:mm a')}</span>
+              <div key={apt.id} className="flex justify-between items-center py-2 border-b border-ink/5 last:border-0">
+                <span className="text-ink font-bold">{apt.patientName}</span>
+                <span className="text-ink/50 font-medium">{apt.slotTime && format(parseISO(apt.slotTime), 'h:mm a')}</span>
               </div>
             ))}
           </div>

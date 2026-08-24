@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '../../lib/utils';
 import { Spinner } from './Spinner';
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
@@ -15,16 +15,16 @@ const variants = {
   ghost: 'bg-transparent text-ink hover:bg-ink/5',
   destructive: 'bg-danger text-surface hover:bg-danger/90 shadow-soft',
 };
-const sizes = { sm: 'px-3 py-1.5 text-sm', md: 'px-4 py-2 text-sm', lg: 'px-6 py-3 text-base' };
+const sizes = { sm: 'h-8 w-8', md: 'h-10 w-10', lg: 'h-12 w-12' };
 
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', isLoading = false, children, disabled, ...props }, ref) => {
+export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
+  ({ className, variant = 'ghost', size = 'md', isLoading = false, children, disabled, ...props }, ref) => {
     return (
       <button
         ref={ref}
         disabled={disabled || isLoading}
         className={cn(
-          'inline-flex items-center justify-center font-body font-medium transition-all duration-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50 focus:ring-offset-2',
+          'inline-flex items-center justify-center rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:ring-offset-2',
           variants[variant],
           sizes[size],
           (disabled || isLoading) && 'opacity-60 cursor-not-allowed',
@@ -32,10 +32,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         {...props}
       >
-        {isLoading && <Spinner size="sm" className="mr-2" />}
-        <span className={cn('inline-flex items-center gap-2 transition-all', isLoading ? 'opacity-80' : '')}>{children}</span>
+        {isLoading ? <Spinner size="sm" /> : children}
       </button>
     );
   }
 );
-Button.displayName = 'Button';
+IconButton.displayName = 'IconButton';

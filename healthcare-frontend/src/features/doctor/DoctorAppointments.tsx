@@ -6,17 +6,19 @@ import { useDoctorAppointments } from './hooks/useDoctorAPI';
 import { Badge } from '../../components/ui/Badge';
 import { Input } from '../../components/ui/Input';
 import { Spinner } from '../../components/ui/Spinner';
+import { Card } from '../../components/ui/Card';
+import { EmptyState } from '../../components/ui/EmptyState';
 import { Reveal, RevealItem } from '../../lib/motion/Reveal';
 import { cn } from '../../lib/utils';
 import type { Appointment } from '../../types/appointment';
 
 const UrgencyBadge: React.FC<{ appointment: Appointment }> = ({ appointment }) => {
   if (appointment.status === 'COMPLETED') {
-    return <Badge variant="success">Completed</Badge>;
+    return <Badge variant="COMPLETED">Completed</Badge>;
   }
   if (!appointment.preVisitSummary || appointment.preVisitSummary.llmStatus === 'PENDING') {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-accent/10 text-accent text-xs font-bold border border-accent/20">
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-accent/10 text-accent text-xs font-bold border border-accent/20">
         <Spinner size="sm" className="h-3 w-3" />
         Analysing…
       </span>
@@ -41,11 +43,12 @@ const DoctorAppointments: React.FC = () => {
       <Reveal delay={0.1}>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl text-primary mb-2">Schedule</h1>
-            <p className="text-slate-500 font-medium">View your appointments for any given date.</p>
+            <h1 className="text-3xl text-ink font-display mb-2">Schedule</h1>
+            <p className="text-ink/60 font-body">View your appointments for any given date.</p>
           </div>
           <div className="w-full md:w-64">
             <Input 
+              label="Select Date"
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
@@ -55,11 +58,11 @@ const DoctorAppointments: React.FC = () => {
       </Reveal>
 
       <Reveal delay={0.2}>
-        <div className="bg-surface border border-primary/5 rounded-2xl overflow-hidden shadow-multi">
+        <Card noPadding>
           {isLoading ? (
             <div className="flex justify-center p-16"><Spinner size="lg" /></div>
           ) : appointments && appointments.length > 0 ? (
-            <Reveal stagger={0.04} className="divide-y divide-primary/5">
+            <Reveal stagger={0.04} className="divide-y divide-ink/5">
               {appointments.map((apt: Appointment) => (
                 <RevealItem key={apt.id}>
                   <Link 
@@ -70,28 +73,28 @@ const DoctorAppointments: React.FC = () => {
                     )}
                   >
                     <div className="flex items-center gap-6 flex-1">
-                      <div className="flex flex-col text-primary w-24">
-                        <span className="font-bold text-primary">{format(parseISO(apt.slotTime), 'h:mm a')}</span>
-                        <span className="text-xs font-medium text-slate-500">30 min</span>
+                      <div className="flex flex-col text-ink w-24">
+                        <span className="font-bold">{format(parseISO(apt.slotTime), 'h:mm a')}</span>
+                        <span className="text-xs font-medium text-ink/50">30 min</span>
                       </div>
                       
-                      <div className="h-12 w-12 rounded-2xl bg-background flex items-center justify-center group-hover:bg-accent/10 transition-colors">
-                        <User className="h-6 w-6 text-slate-400 group-hover:text-accent" />
+                      <div className="h-12 w-12 rounded-xl bg-bg flex items-center justify-center group-hover:bg-accent/10 transition-colors">
+                        <User className="h-6 w-6 text-ink/40 group-hover:text-accent" />
                       </div>
 
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-1">
-                          <h3 className="font-bold text-lg text-primary">
+                          <h3 className="font-display font-medium text-lg text-ink">
                           {apt.patient 
                             ? (apt.patient as any).name || `${apt.patient.firstName} ${apt.patient.lastName}`
                             : (apt as any).patientName || 'Unknown Patient'}
                         </h3>
                           {apt.status === 'CANCELLED' && (
-                            <Badge variant="danger">Cancelled</Badge>
+                            <Badge variant="CANCELLED">Cancelled</Badge>
                           )}
                         </div>
                         {apt.symptomForm?.symptoms && apt.status !== 'CANCELLED' && (
-                          <p className="text-sm font-medium text-slate-500 truncate max-w-md">
+                          <p className="text-sm font-body text-ink/60 truncate max-w-md">
                             {apt.symptomForm.symptoms}
                           </p>
                         )}
@@ -103,7 +106,7 @@ const DoctorAppointments: React.FC = () => {
                         <div className="hidden md:block">
                           <UrgencyBadge appointment={apt} />
                         </div>
-                        <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-accent transition-colors" />
+                        <ChevronRight className="h-5 w-5 text-ink/30 group-hover:text-accent transition-colors" />
                       </div>
                     )}
                   </Link>
@@ -111,12 +114,13 @@ const DoctorAppointments: React.FC = () => {
               ))}
             </Reveal>
           ) : (
-            <div className="p-16 text-center text-slate-500 font-medium">
-              <CalendarIcon className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-              <p>No appointments found for {format(parseISO(selectedDate), 'MMMM d, yyyy')}.</p>
-            </div>
+            <EmptyState 
+              icon={CalendarIcon} 
+              title="No appointments found" 
+              description={`No appointments found for ${format(parseISO(selectedDate), 'MMMM d, yyyy')}.`} 
+            />
           )}
-        </div>
+        </Card>
       </Reveal>
     </div>
   );

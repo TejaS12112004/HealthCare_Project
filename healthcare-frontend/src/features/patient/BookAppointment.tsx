@@ -8,8 +8,10 @@ import { AlertCircle, Calendar, CheckCircle2, ChevronRight, Clock, Info } from '
 import { useConfirmBooking, useDoctorSlots, useHoldSlot } from './hooks/usePatientAPI';
 import { motion } from 'framer-motion';
 import { Button } from '../../components/ui/Button';
-import { AsyncButton } from '../../components/ui/AsyncButton';
 import { Input } from '../../components/ui/Input';
+import { Select } from '../../components/ui/Select';
+import { Textarea } from '../../components/ui/Textarea';
+import { Card } from '../../components/ui/Card';
 import { Spinner } from '../../components/ui/Spinner';
 import { cn } from '../../lib/utils';
 import type { HoldResponse, Appointment, SlotResponse } from '../../types/appointment';
@@ -102,38 +104,38 @@ const BookAppointment: React.FC = () => {
     <div className="p-8 max-w-4xl mx-auto">
       {/* Header & Steps */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-6">Book Appointment</h1>
+        <h1 className="text-3xl font-display font-medium text-ink mb-6">Book Appointment</h1>
         <div className="flex items-center gap-4 text-sm font-medium">
-          <div className={cn("flex items-center gap-2", step >= 1 ? "text-indigo-400" : "text-slate-500")}>
-            <div className={cn("h-6 w-6 rounded-full flex items-center justify-center", step >= 1 ? "bg-indigo-600 text-white" : "bg-slate-800")}>1</div>
+          <div className={cn("flex items-center gap-2", step >= 1 ? "text-accent" : "text-ink/40")}>
+            <div className={cn("h-6 w-6 rounded-full flex items-center justify-center text-white", step >= 1 ? "bg-accent" : "bg-ink/20")}>1</div>
             Select Slot
           </div>
-          <ChevronRight className="h-4 w-4 text-slate-700" />
-          <div className={cn("flex items-center gap-2", step >= 2 ? "text-indigo-400" : "text-slate-500")}>
-            <div className={cn("h-6 w-6 rounded-full flex items-center justify-center", step >= 2 ? "bg-indigo-600 text-white" : "bg-slate-800")}>2</div>
+          <ChevronRight className="h-4 w-4 text-ink/20" />
+          <div className={cn("flex items-center gap-2", step >= 2 ? "text-accent" : "text-ink/40")}>
+            <div className={cn("h-6 w-6 rounded-full flex items-center justify-center text-white", step >= 2 ? "bg-accent" : "bg-ink/20")}>2</div>
             Symptoms
           </div>
-          <ChevronRight className="h-4 w-4 text-slate-700" />
-          <div className={cn("flex items-center gap-2", step >= 3 ? "text-indigo-400" : "text-slate-500")}>
-            <div className={cn("h-6 w-6 rounded-full flex items-center justify-center", step >= 3 ? "bg-indigo-600 text-white" : "bg-slate-800")}>3</div>
+          <ChevronRight className="h-4 w-4 text-ink/20" />
+          <div className={cn("flex items-center gap-2", step >= 3 ? "text-accent" : "text-ink/40")}>
+            <div className={cn("h-6 w-6 rounded-full flex items-center justify-center text-white", step >= 3 ? "bg-accent" : "bg-ink/20")}>3</div>
             Confirm
           </div>
         </div>
       </div>
 
       {expiredError && (
-        <div className="mb-6 p-4 rounded-lg bg-red-900/50 border border-red-800 flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
+        <div className="mb-6 p-4 rounded-xl bg-danger/10 border border-danger/20 flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 text-danger mt-0.5 flex-shrink-0" />
           <div>
-            <h4 className="text-sm font-semibold text-red-400">Hold Expired</h4>
-            <p className="text-sm text-red-300">Your 10-minute hold on the slot expired. Please select a new slot.</p>
+            <h4 className="text-sm font-bold text-danger">Hold Expired</h4>
+            <p className="text-sm text-danger/80 font-medium">Your 10-minute hold on the slot expired. Please select a new slot.</p>
           </div>
         </div>
       )}
 
       {/* Step 1: Select Slot */}
       {step === 1 && (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+        <Card>
           <div className="mb-6 max-w-xs">
             <Input
               label="Select Date"
@@ -144,7 +146,7 @@ const BookAppointment: React.FC = () => {
             />
           </div>
 
-          <h3 className="text-lg font-semibold text-white mb-4">Available Slots</h3>
+          <h3 className="text-lg font-display font-medium text-ink mb-4">Available Slots</h3>
           {loadingSlots ? (
             <div className="flex justify-center p-8"><Spinner /></div>
           ) : slots?.length ? (
@@ -157,10 +159,10 @@ const BookAppointment: React.FC = () => {
                   disabled={!s.isAvailable || isHolding}
                   onClick={() => handleHold(s.slotTime)}
                   className={cn(
-                    "px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                    "px-4 py-3 rounded-xl text-sm font-medium transition-colors",
                     s.isAvailable
-                      ? "bg-slate-800 text-indigo-300 hover:bg-indigo-600 hover:text-white border border-slate-700 hover:border-indigo-500 cursor-pointer"
-                      : "bg-slate-950 text-slate-600 border border-slate-900 cursor-not-allowed opacity-50"
+                      ? "bg-bg text-ink border border-ink/10 hover:bg-accent hover:text-white hover:border-accent cursor-pointer"
+                      : "bg-bg/50 text-ink/30 border border-ink/5 cursor-not-allowed"
                   )}
                 >
                   {format(parseISO(s.slotTime), 'h:mm a')}
@@ -168,87 +170,93 @@ const BookAppointment: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div className="p-8 text-center text-slate-400 bg-slate-950 rounded-lg">
+            <div className="p-8 text-center text-ink/50 bg-bg rounded-xl font-medium border border-ink/5">
               No slots available on this date.
             </div>
           )}
-        </div>
+        </Card>
       )}
 
       {/* Step 2: Symptoms */}
       {step === 2 && hold && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-6">
-            <h2 className="text-xl font-semibold text-white mb-6">Patient Symptoms</h2>
-            <form id="symptom-form" onSubmit={handleSubmit(onConfirm)} className="space-y-4">
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-slate-300">Symptoms *</label>
-                <textarea
-                  className={cn(
-                    'rounded-lg border bg-slate-800/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500',
-                    errors.symptoms ? 'border-red-500' : 'border-slate-700'
-                  )}
-                  rows={3}
-                  placeholder="Describe how you are feeling..."
-                  {...register('symptoms')}
-                />
-                {errors.symptoms && <p className="text-xs text-red-400">{errors.symptoms.message}</p>}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <Input label="Duration (Days) *" type="number" error={errors.durationDays?.message} {...register('durationDays')} />
-                <div className="flex flex-col gap-1">
-                  <label className="text-sm font-medium text-slate-300">Severity *</label>
-                  <select
-                    className="rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 h-10"
-                    {...register('severity')}
-                  >
-                    <option value="MILD">Low / Mild</option>
-                    <option value="MODERATE">Medium / Moderate</option>
-                    <option value="SEVERE">High / Severe</option>
-                  </select>
+          <div className="md:col-span-2">
+            <Card>
+              <h2 className="text-xl font-display font-medium text-ink mb-6">Patient Symptoms</h2>
+              <form id="symptom-form" onSubmit={handleSubmit(onConfirm)} className="space-y-6">
+                <div>
+                  <Textarea
+                    label="Symptoms *"
+                    rows={3}
+                    placeholder="Describe how you are feeling..."
+                    error={errors.symptoms?.message}
+                    {...register('symptoms')}
+                  />
                 </div>
-              </div>
 
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-slate-300">Additional Notes (Optional)</label>
-                <textarea
-                  className="rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  rows={2}
-                  {...register('additionalNotes')}
-                />
-              </div>
-            </form>
+                <div className="grid grid-cols-2 gap-4">
+                  <Input 
+                    label="Duration (Days) *" 
+                    type="number" 
+                    error={errors.durationDays?.message} 
+                    {...register('durationDays')} 
+                  />
+                  <Select
+                    label="Severity *"
+                    options={[
+                      { label: 'Low / Mild', value: 'MILD' },
+                      { label: 'Medium / Moderate', value: 'MODERATE' },
+                      { label: 'High / Severe', value: 'SEVERE' }
+                    ]}
+                    error={errors.severity?.message}
+                    {...register('severity')}
+                  />
+                </div>
+
+                <div>
+                  <Textarea
+                    label="Additional Notes (Optional)"
+                    rows={2}
+                    error={errors.additionalNotes?.message}
+                    {...register('additionalNotes')}
+                  />
+                </div>
+              </form>
+            </Card>
           </div>
 
           <div className="space-y-4">
-            <div className="bg-indigo-900/20 border border-indigo-500/30 rounded-xl p-5">
-              <div className="flex items-center gap-2 text-indigo-400 mb-2">
+            <Card className="!bg-accent/5 !border-accent/20">
+              <div className="flex items-center gap-2 text-accent mb-2">
                 <Clock className="h-5 w-5" />
-                <h3 className="font-semibold">Hold Expires In</h3>
+                <h3 className="font-bold">Hold Expires In</h3>
               </div>
-              <div className="text-3xl font-mono font-bold text-white tracking-wider">{timeLeft}</div>
-              <p className="text-xs text-indigo-300/70 mt-2">Complete this form to confirm your slot.</p>
-            </div>
+              <div className="text-3xl font-mono font-bold text-accent tracking-wider">{timeLeft}</div>
+              <p className="text-xs text-accent/70 mt-2 font-medium">Complete this form to confirm your slot.</p>
+            </Card>
 
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-              <h3 className="font-semibold text-white mb-4">Slot Details</h3>
-              <div className="space-y-3 text-sm text-slate-300">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-slate-500" />
+            <Card>
+              <h3 className="font-display font-medium text-ink mb-4">Slot Details</h3>
+              <div className="space-y-3 text-sm text-ink/70 font-medium">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-accent/10 flex items-center justify-center">
+                    <Calendar className="h-4 w-4 text-accent" />
+                  </div>
                   {format(parseISO(hold.slotTime), 'MMMM d, yyyy')}
                 </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-slate-500" />
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-accent/10 flex items-center justify-center">
+                    <Clock className="h-4 w-4 text-accent" />
+                  </div>
                   {format(parseISO(hold.slotTime), 'h:mm a')}
                 </div>
               </div>
-            </div>
+            </Card>
 
             <div className="w-full">
-              <AsyncButton type="submit" form="symptom-form" isLoading={isConfirming} className="w-full">
+              <Button type="submit" form="symptom-form" isLoading={isConfirming} className="w-full">
                 Confirm Booking
-              </AsyncButton>
+              </Button>
             </div>
           </div>
         </div>
@@ -256,25 +264,27 @@ const BookAppointment: React.FC = () => {
 
       {/* Step 3: Confirmation */}
       {step === 3 && appointment && (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center max-w-lg mx-auto">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-900/50 mb-6">
-            <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+        <Card className="text-center max-w-lg mx-auto py-12">
+          <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-success/10 mb-6">
+            <CheckCircle2 className="h-8 w-8 text-success" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">Booking Confirmed!</h2>
-          <p className="text-slate-400 mb-6">Your appointment with Dr. {appointment.doctor.lastName} is set for <strong>{format(parseISO(appointment.slotTime), 'MMM d, h:mm a')}</strong>.</p>
+          <h2 className="text-2xl font-display font-medium text-ink mb-2">Booking Confirmed!</h2>
+          <p className="text-ink/60 font-body mb-8">Your appointment with Dr. {appointment.doctor.lastName} is set for <strong>{format(parseISO(appointment.slotTime), 'MMM d, h:mm a')}</strong>.</p>
           
-          <div className="bg-slate-950 rounded-lg p-4 mb-8 text-left flex items-start gap-3">
-            <Info className="h-5 w-5 text-indigo-400 flex-shrink-0 mt-0.5" />
+          <div className="bg-bg rounded-xl border border-ink/5 p-5 mb-8 text-left flex items-start gap-4">
+            <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+              <Info className="h-5 w-5 text-accent" />
+            </div>
             <div>
-              <p className="text-sm font-medium text-slate-300">AI Summary Preparation</p>
-              <p className="text-xs text-slate-500 mt-1">An AI-generated pre-visit summary is currently being prepared for your doctor based on your symptoms. You will receive an email confirmation shortly.</p>
+              <p className="text-sm font-bold text-ink">AI Summary Preparation</p>
+              <p className="text-xs text-ink/60 font-medium mt-1 leading-relaxed">An AI-generated pre-visit summary is currently being prepared for your doctor based on your symptoms. You will receive an email confirmation shortly.</p>
             </div>
           </div>
 
           <Link to="/patient/appointments">
             <Button className="w-full">View My Appointments</Button>
           </Link>
-        </div>
+        </Card>
       )}
     </div>
   );

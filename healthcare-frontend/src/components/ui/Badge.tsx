@@ -1,40 +1,37 @@
+import React from 'react';
 import { cn } from '../../lib/utils';
-import type { AppointmentStatus, UrgencyLevel } from '../../types/appointment';
 
-type BadgeVariant = 'default' | 'success' | 'warning' | 'danger' | 'info' | AppointmentStatus | UrgencyLevel;
+type BadgeVariant = 'success' | 'warning' | 'danger' | 'neutral' | 'accent' | 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
 
-const variantMap: Record<string, string> = {
-  default: 'bg-slate-700 text-slate-300',
-  success: 'bg-emerald-900/50 text-emerald-400 border border-emerald-800',
-  warning: 'bg-amber-900/50 text-amber-400 border border-amber-800',
-  danger: 'bg-red-900/50 text-red-400 border border-red-800',
-  info: 'bg-indigo-900/50 text-indigo-400 border border-indigo-800',
-  // Appointment statuses
-  PENDING: 'bg-amber-900/50 text-amber-400 border border-amber-800',
-  CONFIRMED: 'bg-emerald-900/50 text-emerald-400 border border-emerald-800',
-  CANCELLED: 'bg-red-900/50 text-red-400 border border-red-800',
-  COMPLETED: 'bg-slate-700 text-slate-300 border border-slate-600',
-  RESCHEDULED: 'bg-indigo-900/50 text-indigo-400 border border-indigo-800',
-  // Urgency levels
-  LOW: 'bg-emerald-900/50 text-emerald-400 border border-emerald-800',
-  MEDIUM: 'bg-amber-900/50 text-amber-400 border border-amber-800',
-  HIGH: 'bg-red-900/50 text-red-400 border border-red-800',
-};
-
-interface BadgeProps {
+export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: BadgeVariant;
-  children: React.ReactNode;
-  className?: string;
 }
 
-export const Badge: React.FC<BadgeProps> = ({ variant = 'default', children, className }) => (
-  <span
-    className={cn(
-      'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-      variantMap[variant as string] ?? variantMap.default,
-      className,
-    )}
-  >
-    {children}
-  </span>
-);
+export const Badge: React.FC<BadgeProps> = ({ variant = 'neutral', className, children, ...props }) => {
+  let mappedVariant = variant;
+  if (variant === 'PENDING') mappedVariant = 'warning';
+  if (variant === 'CONFIRMED') mappedVariant = 'accent';
+  if (variant === 'COMPLETED') mappedVariant = 'success';
+  if (variant === 'CANCELLED') mappedVariant = 'danger';
+
+  const variants: Record<string, string> = {
+    success: 'bg-success/10 text-success border-success/20',
+    warning: 'bg-warning/10 text-warning border-warning/20',
+    danger: 'bg-danger/10 text-danger border-danger/20',
+    accent: 'bg-accent/10 text-accent border-accent/20',
+    neutral: 'bg-ink/5 text-ink/70 border-ink/10',
+  };
+
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-body font-bold border transition-colors',
+        variants[mappedVariant] || variants.neutral,
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </span>
+  );
+};

@@ -9,8 +9,12 @@ import { useDoctorAppointment, useSubmitNotes } from './hooks/useDoctorAPI';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { AsyncButton } from '../../components/ui/AsyncButton';
+import { IconButton } from '../../components/ui/IconButton';
+import { Input } from '../../components/ui/Input';
+import { Select } from '../../components/ui/Select';
+import { Textarea } from '../../components/ui/Textarea';
 import { Spinner } from '../../components/ui/Spinner';
+import { Card } from '../../components/ui/Card';
 import { useToast } from '../../contexts/ToastContext';
 import { Reveal } from '../../lib/motion/Reveal';
 import { cn } from '../../lib/utils';
@@ -70,7 +74,7 @@ const PostVisitNotes: React.FC = () => {
   };
 
   if (isLoading) return <div className="flex justify-center p-16"><Spinner size="lg" /></div>;
-  if (!apt) return <div className="p-8 text-center text-slate-400">Appointment not found.</div>;
+  if (!apt) return <div className="p-8 text-center text-ink/40">Appointment not found.</div>;
 
   const summary = apt.preVisitSummary;
 
@@ -78,69 +82,69 @@ const PostVisitNotes: React.FC = () => {
     <div className="max-w-7xl mx-auto space-y-8 p-8">
       {/* Header */}
       <Reveal>
-        <div className="bg-surface border border-primary/5 shadow-multi rounded-2xl p-6 flex items-center justify-between">
+        <Card className="flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <div className="h-16 w-16 rounded-2xl bg-background flex items-center justify-center">
-              <User className="h-8 w-8 text-slate-400" />
+            <div className="h-16 w-16 rounded-xl bg-bg flex items-center justify-center">
+              <User className="h-8 w-8 text-ink/30" />
             </div>
             <div>
-              <h1 className="text-3xl text-primary">{apt.patient.firstName} {apt.patient.lastName}</h1>
-              <div className="flex items-center gap-4 mt-2 text-sm text-slate-500 font-medium">
+              <h1 className="text-3xl text-ink font-display font-medium">{apt.patient.firstName} {apt.patient.lastName}</h1>
+              <div className="flex items-center gap-4 mt-2 text-sm text-ink/60 font-body">
                 <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" /> {format(parseISO(apt.slotTime), 'MMM d, yyyy')}</span>
                 <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {format(parseISO(apt.slotTime), 'h:mm a')}</span>
                 <Badge variant={apt.status}>{apt.status}</Badge>
               </div>
             </div>
           </div>
-        </div>
+        </Card>
       </Reveal>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: AI Pre-visit Summary */}
         <Reveal delay={0.1} className="lg:col-span-5 space-y-6">
-          <div className="bg-surface border border-primary/5 shadow-multi rounded-2xl p-6">
-            <h2 className="text-xl font-bold text-primary mb-6 flex items-center gap-2">
+          <Card>
+            <h2 className="text-xl font-display font-medium text-ink mb-6 flex items-center gap-2">
               <BrainCircuit className="h-5 w-5 text-accent" />
               AI Pre-Visit Summary
             </h2>
 
             {!summary || summary.llmStatus === 'PENDING' ? (
               <div className="space-y-4 animate-pulse">
-                <div className="h-4 bg-background rounded w-1/4 mb-6"></div>
-                <div className="h-24 bg-background rounded mb-6"></div>
-                <div className="h-4 bg-background rounded w-1/3 mb-4"></div>
+                <div className="h-4 bg-bg rounded w-1/4 mb-6"></div>
+                <div className="h-24 bg-bg rounded mb-6"></div>
+                <div className="h-4 bg-bg rounded w-1/3 mb-4"></div>
                 <div className="space-y-2">
-                  <div className="h-3 bg-background rounded"></div>
-                  <div className="h-3 bg-background rounded w-5/6"></div>
+                  <div className="h-3 bg-bg rounded"></div>
+                  <div className="h-3 bg-bg rounded w-5/6"></div>
                 </div>
                 <div className="flex items-center gap-3 text-sm font-medium text-accent mt-8 justify-center">
                   <Spinner size="sm" /> Analyzing patient symptoms…
                 </div>
               </div>
             ) : summary.llmStatus === 'FAILED' ? (
-              <div className="bg-red-50 border border-red-100 rounded-xl p-5 text-red-500 font-medium text-sm">
+              <div className="bg-danger/10 border border-danger/20 rounded-lg p-5 text-danger font-medium text-sm">
                 AI summary generation failed. Please review the raw symptoms below.
               </div>
             ) : (
               <div className="space-y-6">
                 <div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Urgency Level</p>
+                  <p className="text-xs font-bold text-ink/50 uppercase tracking-wider mb-2">Urgency Level</p>
                   {summary.urgencyLevel === 'HIGH' ? <Badge variant="danger">HIGH</Badge> : 
                    summary.urgencyLevel === 'MEDIUM' ? <Badge variant="warning">MEDIUM</Badge> : 
                    <Badge variant="success">LOW</Badge>}
                 </div>
                 
                 <div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Chief Complaint</p>
-                  <p className="text-primary font-medium text-sm">{summary.chiefComplaint}</p>
+                  <p className="text-xs font-bold text-ink/50 uppercase tracking-wider mb-2">Chief Complaint</p>
+                  <p className="text-ink font-medium text-sm">{summary.chiefComplaint}</p>
                 </div>
 
                 {summary.suggestedQuestions && summary.suggestedQuestions.length > 0 && (
                   <div>
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Suggested Questions</p>
+                    <p className="text-xs font-bold text-ink/50 uppercase tracking-wider mb-2">Suggested Questions</p>
                     <ul className="list-disc pl-5 space-y-1">
                       {summary.suggestedQuestions.map((q, i) => (
-                        <li key={i} className="text-primary font-medium text-sm">{q}</li>
+                         <li key={i} className="text-ink font-medium text-sm ml-4">{q}</li>
                       ))}
                     </ul>
                   </div>
@@ -149,69 +153,64 @@ const PostVisitNotes: React.FC = () => {
             )}
 
             {/* Collapsible Raw Symptoms */}
-            <div className="mt-8 pt-6 border-t border-primary/5">
+            <div className="mt-8 pt-6 border-t border-ink/5">
               <button 
                 onClick={() => setShowRawSymptoms(!showRawSymptoms)}
-                className="flex items-center justify-between w-full text-sm font-bold text-slate-500 hover:text-accent transition-colors"
+                className="flex items-center justify-between w-full text-sm font-bold text-ink/50 hover:text-accent transition-colors"
               >
                 Raw Patient Symptoms
                 {showRawSymptoms ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
               </button>
               {showRawSymptoms && apt.symptomForm && (
-                <div className="mt-4 bg-background p-4 rounded-xl border border-primary/5 text-sm space-y-3">
-                  <div><strong className="text-slate-500 font-bold">Severity:</strong> <span className="text-primary font-medium">{apt.symptomForm.severity}/10</span></div>
-                  <div><strong className="text-slate-500 font-bold">Duration:</strong> <span className="text-primary font-medium">{apt.symptomForm.durationDays} days</span></div>
-                  <div><strong className="text-slate-500 font-bold">Symptoms:</strong> <p className="text-primary font-medium mt-1 whitespace-pre-wrap">{apt.symptomForm.symptoms}</p></div>
+                <div className="mt-4 bg-bg p-4 rounded-lg border border-ink/5 text-sm space-y-3">
+                  <div><strong className="text-ink/60 font-bold">Severity:</strong> <span className="text-ink font-medium">{apt.symptomForm.severity}/10</span></div>
+                  <div><strong className="text-ink/60 font-bold">Duration:</strong> <span className="text-ink font-medium">{apt.symptomForm.durationDays} days</span></div>
+                  <div><strong className="text-ink/60 font-bold">Symptoms:</strong> <p className="text-ink font-medium mt-1 whitespace-pre-wrap">{apt.symptomForm.symptoms}</p></div>
                   {apt.symptomForm.additionalNotes && (
-                    <div><strong className="text-slate-500 font-bold">Notes:</strong> <p className="text-primary font-medium mt-1 italic">{apt.symptomForm.additionalNotes}</p></div>
+                    <div><strong className="text-ink/60 font-bold">Notes:</strong> <p className="text-ink font-medium mt-1 italic">{apt.symptomForm.additionalNotes}</p></div>
                   )}
                 </div>
               )}
             </div>
-          </div>
+          </Card>
         </Reveal>
 
         {/* Right Column: Post-Visit Notes Form */}
         <Reveal delay={0.2} className="lg:col-span-7">
           {apt.status === 'COMPLETED' ? (
-            <div className="bg-surface border border-primary/5 shadow-multi rounded-2xl p-6">
-              <h2 className="text-xl font-bold text-primary mb-6">Consultation Completed</h2>
-              <p className="text-slate-500 font-medium mb-6">Notes have already been submitted for this appointment.</p>
-              <div className="bg-background p-5 rounded-xl border border-primary/5 text-sm font-medium text-primary whitespace-pre-wrap">
+            <Card>
+              <h2 className="text-xl font-display font-medium text-ink mb-6">Consultation Completed</h2>
+              <p className="text-ink/60 font-medium mb-6">Notes have already been submitted for this appointment.</p>
+              <div className="bg-bg p-5 rounded-lg border border-ink/5 text-sm font-medium text-ink whitespace-pre-wrap">
                 Notes have been successfully documented. Patient summary generated.
               </div>
-            </div>
+            </Card>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div className="bg-surface border border-primary/5 shadow-multi rounded-2xl p-6">
-                <h2 className="text-xl font-bold text-primary mb-6">Post-Visit Clinical Notes</h2>
+              <Card>
+                <h2 className="text-xl font-display font-medium text-ink mb-6">Post-Visit Clinical Notes</h2>
                 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-500">Clinical Notes *</label>
-                  <textarea
+                  <Textarea
+                    label="Clinical Notes *"
                     rows={6}
-                    className={cn(
-                      "w-full rounded-xl border bg-background px-4 py-3 text-sm font-medium text-primary placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-colors",
-                      errors.clinicalNotes ? "border-red-500" : "border-primary/10"
-                    )}
-                    placeholder="Enter examination findings, diagnosis, and plan..."
+                    error={errors.clinicalNotes?.message}
                     {...register("clinicalNotes")}
                   />
-                  {errors.clinicalNotes && <p className="text-xs font-bold text-red-500">{errors.clinicalNotes.message}</p>}
                 </div>
-              </div>
+              </Card>
 
               {/* Prescriptions Array */}
-              <div className="bg-surface border border-primary/5 shadow-multi rounded-2xl p-6">
+              <Card>
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-bold text-primary">Prescriptions</h3>
+                  <h3 className="text-lg font-display font-medium text-ink">Prescriptions</h3>
                   <Button type="button" variant="secondary" size="sm" onClick={() => append({ medicationName: '', dosage: '', frequency: 'ONCE_DAILY', durationDays: '7', instructions: '' })}>
                     <Plus className="h-4 w-4 mr-1" /> Add Medication
                   </Button>
                 </div>
 
                 {fields.length === 0 ? (
-                  <p className="text-sm font-medium text-slate-500 text-center py-6 border border-dashed border-primary/10 rounded-xl">No prescriptions added.</p>
+                  <p className="text-sm font-body text-ink/50 text-center py-6 border border-dashed border-ink/10 rounded-lg">No prescriptions added.</p>
                 ) : (
                   <div className="space-y-4">
                     <AnimatePresence initial={false}>
@@ -222,57 +221,53 @@ const PostVisitNotes: React.FC = () => {
                           animate={{ opacity: 1, y: 0, height: 'auto' }}
                           exit={{ opacity: 0, scale: 0.95, height: 0, marginBottom: 0, overflow: 'hidden' }}
                           transition={{ duration: 0.2 }}
-                          className="relative bg-background p-5 rounded-2xl border border-primary/5 grid grid-cols-1 md:grid-cols-2 gap-4"
+                          className="relative bg-bg p-5 rounded-lg border border-ink/5 grid grid-cols-1 md:grid-cols-2 gap-4"
                         >
-                          <button type="button" onClick={() => remove(index)} className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors">
+                          <IconButton type="button" variant="ghost" size="sm" onClick={() => remove(index)} className="absolute top-2 right-2 text-ink/40 hover:text-danger z-10">
                             <Trash2 className="h-4 w-4" />
-                          </button>
+                          </IconButton>
                           
                           <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500">Medication *</label>
-                            <input 
-                              className="w-full rounded-xl border border-primary/10 bg-surface px-3 py-2 text-sm font-medium text-primary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors" 
+                            <Input 
+                              label="Medication *"
+                              error={errors.prescriptions?.[index]?.medicationName?.message}
                               {...register(`prescriptions.${index}.medicationName` as const)} 
                             />
-                            {errors.prescriptions?.[index]?.medicationName && <p className="text-xs font-bold text-red-500">Required</p>}
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500">Dosage *</label>
-                            <input 
-                              placeholder="e.g. 500mg"
-                              className="w-full rounded-xl border border-primary/10 bg-surface px-3 py-2 text-sm font-medium text-primary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors placeholder-slate-400" 
+                            <Input 
+                              label="Dosage *"
+                              error={errors.prescriptions?.[index]?.dosage?.message}
                               {...register(`prescriptions.${index}.dosage` as const)} 
                             />
-                            {errors.prescriptions?.[index]?.dosage && <p className="text-xs font-bold text-red-500">Required</p>}
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500">Frequency *</label>
-                            <select 
-                              className="w-full rounded-xl border border-primary/10 bg-surface px-3 py-2 text-sm font-medium text-primary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors h-[38px]" 
+                            <Select 
+                              label="Frequency *"
+                              options={[
+                                { label: 'Once Daily', value: 'ONCE_DAILY' },
+                                { label: 'Twice Daily', value: 'TWICE_DAILY' },
+                                { label: 'Thrice Daily', value: 'THRICE_DAILY' }
+                              ]}
                               {...register(`prescriptions.${index}.frequency` as const)}
-                            >
-                              <option value="ONCE_DAILY">Once Daily</option>
-                              <option value="TWICE_DAILY">Twice Daily</option>
-                              <option value="THRICE_DAILY">Thrice Daily</option>
-                            </select>
+                            />
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500">Duration (Days) *</label>
-                            <input 
+                            <Input 
                               type="number"
-                              className="w-full rounded-xl border border-primary/10 bg-surface px-3 py-2 text-sm font-medium text-primary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors" 
+                              label="Duration (Days) *"
+                              error={errors.prescriptions?.[index]?.durationDays?.message}
                               {...register(`prescriptions.${index}.durationDays` as const)} 
                             />
                           </div>
 
                           <div className="md:col-span-2 space-y-1">
-                            <label className="text-xs font-bold text-slate-500">Instructions (Optional)</label>
-                            <input 
-                              placeholder="e.g. Take after meals"
-                              className="w-full rounded-xl border border-primary/10 bg-surface px-3 py-2 text-sm font-medium text-primary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors placeholder-slate-400" 
+                            <Input 
+                              label="Instructions (Optional)"
+                              error={errors.prescriptions?.[index]?.instructions?.message}
                               {...register(`prescriptions.${index}.instructions` as const)} 
                             />
                           </div>
@@ -281,13 +276,13 @@ const PostVisitNotes: React.FC = () => {
                     </AnimatePresence>
                   </div>
                 )}
-              </div>
+              </Card>
 
               <div className="flex justify-end pt-4">
                 <div className="w-full sm:w-auto">
-                  <AsyncButton type="submit" isLoading={isSubmitting} className="w-full">
+                  <Button type="submit" isLoading={isSubmitting} className="w-full">
                     Submit Notes & Generate Patient Summary
-                  </AsyncButton>
+                  </Button>
                 </div>
               </div>
             </form>

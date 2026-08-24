@@ -1,20 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label: string;
   error?: string;
 }
 
-export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, className, id, type, value, ...props }, ref) => {
-    const [showPassword, setShowPassword] = useState(false);
+export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+  ({ label, error, className, id, value, ...props }, ref) => {
     const inputId = id ?? label.toLowerCase().replace(/\s+/g, '-');
-    
-    const isPassword = type === 'password';
-    const inputType = isPassword ? (showPassword ? 'text' : 'password') : type;
 
     return (
       <motion.div 
@@ -23,12 +18,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         transition={{ duration: 0.4 }}
       >
         <div className="relative w-full">
-          <input
+          <textarea
             ref={ref}
             id={inputId}
-            type={inputType}
             className={cn(
-              'peer w-full h-14 rounded-lg border bg-transparent px-4 pt-4 pb-1 text-ink font-body transition-all duration-150',
+              'peer w-full min-h-[100px] rounded-lg border bg-transparent px-4 pt-6 pb-2 text-ink font-body transition-all duration-150 resize-y',
               'focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent',
               error ? 'border-danger focus:ring-danger/50 focus:border-danger' : 'border-ink/10 hover:border-ink/20',
               className
@@ -48,26 +42,6 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           >
             {label}
           </label>
-
-          {isPassword && (
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-ink/40 hover:text-ink/70 focus:outline-none"
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={showPassword ? 'hide' : 'show'}
-                  initial={{ opacity: 0, rotate: -90 }}
-                  animate={{ opacity: 1, rotate: 0 }}
-                  exit={{ opacity: 0, rotate: 90 }}
-                  transition={{ duration: 0.15 }}
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </motion.div>
-              </AnimatePresence>
-            </button>
-          )}
         </div>
         
         <AnimatePresence>
@@ -86,4 +60,4 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     );
   }
 );
-Input.displayName = 'Input';
+Textarea.displayName = 'Textarea';

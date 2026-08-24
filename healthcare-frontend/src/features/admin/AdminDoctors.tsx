@@ -6,6 +6,7 @@ import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { Spinner } from '../../components/ui/Spinner';
 import { Badge } from '../../components/ui/Badge';
+import { Card } from '../../components/ui/Card';
 import { Reveal } from '../../lib/motion/Reveal';
 import type { Doctor } from '../../types/appointment';
 
@@ -72,8 +73,8 @@ export const AdminDoctors: React.FC = () => {
     <div className="space-y-8 max-w-7xl mx-auto p-8">
       <Reveal className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl text-primary mb-2">Manage Doctors</h1>
-          <p className="text-slate-500 font-medium">Add, update, or deactivate doctors in the system.</p>
+          <h1 className="text-3xl text-ink font-display mb-2">Manage Doctors</h1>
+          <p className="text-ink/60 font-body">Add, update, or deactivate doctors in the system.</p>
         </div>
         <Button onClick={() => handleOpenModal()}>
           <Plus className="h-5 w-5 mr-2" />
@@ -82,13 +83,13 @@ export const AdminDoctors: React.FC = () => {
       </Reveal>
 
       <Reveal delay={0.1}>
-        <div className="bg-surface border border-primary/5 shadow-multi rounded-2xl overflow-hidden">
+        <Card className="p-0 overflow-hidden">
           {isLoading ? (
             <div className="flex justify-center p-12"><Spinner size="lg" /></div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-primary">
-                <thead className="bg-background text-xs uppercase text-slate-500 font-bold border-b border-primary/5 tracking-wider">
+              <table className="w-full text-left text-sm text-ink">
+                <thead className="bg-bg text-xs uppercase text-ink/50 font-bold border-b border-ink/5 tracking-wider">
                   <tr>
                     <th className="px-6 py-4 font-bold">Doctor Name</th>
                     <th className="px-6 py-4 font-bold">Specialisation</th>
@@ -97,17 +98,17 @@ export const AdminDoctors: React.FC = () => {
                     <th className="px-6 py-4 font-bold text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-primary/5">
+                <tbody className="divide-y divide-ink/5 bg-surface">
                   {doctors?.map(doc => (
-                    <tr key={doc.id} className="hover:bg-surface-hover transition-colors">
+                    <tr key={doc.id} className="hover:bg-accent/5 transition-colors">
                       <td className="px-6 py-4">
-                        <div className="font-bold text-primary">Dr. {doc.firstName} {doc.lastName}</div>
-                        <div className="text-xs text-slate-500 font-medium">{doc.email}</div>
+                        <div className="font-bold text-ink">Dr. {doc.firstName} {doc.lastName}</div>
+                        <div className="text-xs text-ink/50 font-medium">{doc.email}</div>
                       </td>
                       <td className="px-6 py-4 font-medium">{doc.specialisation}</td>
                       <td className="px-6 py-4">
                         <div className="font-medium">{doc.slotDurationMinutes} min/slot</div>
-                        <div className="text-xs text-slate-500 font-medium">{doc.workingHours?.length || 0} working days</div>
+                        <div className="text-xs text-ink/50 font-medium">{doc.workingHours?.length || 0} working days</div>
                       </td>
                       <td className="px-6 py-4">
                         {doc.isActive ? <Badge variant="success">Active</Badge> : <Badge variant="danger">Inactive</Badge>}
@@ -116,7 +117,7 @@ export const AdminDoctors: React.FC = () => {
                         <div className="flex justify-end gap-2">
                           <button 
                             onClick={() => handleOpenModal(doc)}
-                            className="p-2 text-slate-400 hover:text-accent hover:bg-accent/10 rounded-lg transition-colors"
+                            className="p-2 text-ink/40 hover:text-accent hover:bg-accent/10 rounded-lg transition-colors"
                             title="Edit Doctor"
                           >
                             <Edit2 className="h-4 w-4" />
@@ -124,7 +125,7 @@ export const AdminDoctors: React.FC = () => {
                           {doc.isActive ? (
                             <button 
                               onClick={() => handleToggleActive(doc)}
-                              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                              className="p-2 text-ink/40 hover:text-danger hover:bg-danger/10 rounded-lg transition-colors"
                               title="Deactivate Doctor"
                             >
                               <PowerOff className="h-4 w-4" />
@@ -132,7 +133,7 @@ export const AdminDoctors: React.FC = () => {
                           ) : (
                             <button 
                               onClick={() => handleToggleActive(doc)}
-                              className="p-2 text-slate-400 hover:text-green-500 hover:bg-green-50 rounded-lg transition-colors"
+                              className="p-2 text-ink/40 hover:text-success hover:bg-success/10 rounded-lg transition-colors"
                               title="Activate Doctor"
                             >
                               <PowerOff className="h-4 w-4" />
@@ -144,7 +145,7 @@ export const AdminDoctors: React.FC = () => {
                   ))}
                   {doctors?.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-slate-500 font-medium">
+                      <td colSpan={5} className="px-6 py-12 text-center text-ink/50 font-medium">
                         No doctors found.
                       </td>
                     </tr>
@@ -153,7 +154,7 @@ export const AdminDoctors: React.FC = () => {
               </table>
             </div>
           )}
-        </div>
+        </Card>
       </Reveal>
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={editingDoctor ? "Edit Doctor" : "Add New Doctor"}>

@@ -3,6 +3,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { Select } from '../../components/ui/Select';
+import { Textarea } from '../../components/ui/Textarea';
 import { useAdminSpecialisations } from './hooks/useAdminAPI';
 import { cn } from '../../lib/utils';
 
@@ -88,84 +90,61 @@ export const AdminDoctorForm: React.FC<AdminDoctorFormProps> = ({ initialData, o
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="text-xs font-medium text-slate-400">First Name *</label>
-          <Input {...register('firstName')} error={errors.firstName?.message} />
-        </div>
-        <div>
-          <label className="text-xs font-medium text-slate-400">Last Name *</label>
-          <Input {...register('lastName')} error={errors.lastName?.message} />
-        </div>
-        <div>
-          <label className="text-xs font-medium text-slate-400">Email *</label>
-          <Input type="email" {...register('email')} error={errors.email?.message} disabled={!!initialData} />
-        </div>
-        <div>
-          <label className="text-xs font-medium text-slate-400">Phone *</label>
-          <Input {...register('phone')} error={errors.phone?.message} />
-        </div>
-        <div>
-          <label className="text-xs font-medium text-slate-400">Specialisation *</label>
-          <select 
-            className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 h-[38px]"
-            {...register('specialisationId')}
-          >
-            <option value="">Select Specialisation</option>
-            {specialisations?.map(s => (
-              <option key={s.id} value={s.id}>{s.name}</option>
-            ))}
-          </select>
-          {errors.specialisationId && <p className="mt-1 text-xs text-red-400">{errors.specialisationId.message}</p>}
-        </div>
-        <div>
-          <label className="text-xs font-medium text-slate-400">Slot Duration (Minutes) *</label>
-          <select 
-            className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 h-[38px]"
-            {...register('slotDurationMinutes')}
-          >
-            <option value="15">15 Minutes</option>
-            <option value="20">20 Minutes</option>
-            <option value="30">30 Minutes</option>
-            <option value="45">45 Minutes</option>
-            <option value="60">60 Minutes</option>
-          </select>
-          {errors.slotDurationMinutes && <p className="mt-1 text-xs text-red-400">{errors.slotDurationMinutes.message}</p>}
-        </div>
+        <Input label="First Name *" {...register('firstName')} error={errors.firstName?.message} />
+        <Input label="Last Name *" {...register('lastName')} error={errors.lastName?.message} />
+        <Input label="Email *" type="email" {...register('email')} error={errors.email?.message} disabled={!!initialData} />
+        <Input label="Phone *" {...register('phone')} error={errors.phone?.message} />
+        <Select
+          label="Specialisation *"
+          options={specialisations?.map((s: any) => ({ label: s.name, value: s.id })) || []}
+          error={errors.specialisationId?.message}
+          {...register('specialisationId')}
+        />
+        <Select
+          label="Slot Duration (Minutes) *"
+          options={[
+            { label: '15 Minutes', value: '15' },
+            { label: '20 Minutes', value: '20' },
+            { label: '30 Minutes', value: '30' },
+            { label: '45 Minutes', value: '45' },
+            { label: '60 Minutes', value: '60' },
+          ]}
+          error={errors.slotDurationMinutes?.message}
+          {...register('slotDurationMinutes')}
+        />
       </div>
 
-      <div>
-        <label className="text-xs font-medium text-slate-400">Bio</label>
-        <textarea 
-          className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 min-h-[80px]"
-          {...register('bio')}
-        />
-        {errors.bio && <p className="mt-1 text-xs text-red-400">{errors.bio.message}</p>}
-      </div>
+      <Textarea
+        label="Bio"
+        rows={3}
+        error={errors.bio?.message}
+        {...register('bio')}
+      />
 
       <div className="space-y-3">
-        <label className="text-sm font-bold text-white">Working Hours</label>
-        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+        <label className="text-sm font-bold text-ink">Working Hours</label>
+        <div className="bg-bg p-4 rounded-xl border border-ink/5 space-y-3">
           {fields.map((field, index) => {
             const isActive = watch(`workingHours.${index}.isActive`);
             return (
               <div key={field.id} className="flex items-center gap-4">
                 <div className="w-32 flex items-center gap-2">
-                  <input type="checkbox" className="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-600" {...register(`workingHours.${index}.isActive`)} />
-                  <span className={cn("text-sm", isActive ? "text-slate-200" : "text-slate-500")}>{DAYS[index]}</span>
+                  <input type="checkbox" className="rounded border-ink/20 bg-surface text-accent focus:ring-accent" {...register(`workingHours.${index}.isActive`)} />
+                  <span className={cn("text-sm font-medium", isActive ? "text-ink" : "text-ink/40")}>{DAYS[index]}</span>
                 </div>
                 <div className="flex-1 flex items-center gap-2">
                   <Input type="time" {...register(`workingHours.${index}.startTime`)} disabled={!isActive} className={cn(!isActive && "opacity-50")} />
-                  <span className="text-slate-500 text-sm">to</span>
+                  <span className="text-ink/50 text-sm">to</span>
                   <Input type="time" {...register(`workingHours.${index}.endTime`)} disabled={!isActive} className={cn(!isActive && "opacity-50")} />
                 </div>
               </div>
             );
           })}
-          {errors.workingHours?.root && <p className="text-xs text-red-400">{errors.workingHours.root.message}</p>}
+          {errors.workingHours?.root && <p className="text-xs text-danger">{errors.workingHours.root.message}</p>}
         </div>
       </div>
 
-      <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+      <div className="flex justify-end gap-3 pt-4 border-t border-ink/5">
         <Button type="submit" isLoading={isSubmitting}>
           {initialData ? 'Update Doctor' : 'Add Doctor'}
         </Button>

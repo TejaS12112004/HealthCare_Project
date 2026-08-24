@@ -1,8 +1,9 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, XCircle, X } from 'lucide-react';
+import { CheckCircle, AlertCircle, Info, X } from 'lucide-react';
+import { IconButton } from '../components/ui/IconButton';
 
-type ToastType = 'success' | 'error';
+type ToastType = 'success' | 'error' | 'info';
 
 interface Toast {
   id: string;
@@ -16,58 +17,59 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
-export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const addToast = useCallback((message: string, type: ToastType) => {
+  const toast = useCallback((message: string, type: ToastType) => {
     const id = Math.random().toString(36).substr(2, 9);
     setToasts((prev) => [...prev, { id, message, type }]);
-    
-    // Auto dismiss after 4 seconds
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
+    }, 5000);
   }, []);
 
-  const removeToast = useCallback((id: string) => {
+  const removeToast = (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
+  };
 
   return (
-    <ToastContext.Provider value={{ toast: addToast }}>
+    <ToastContext.Provider value={{ toast }}>
       {children}
-      <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
+      <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3">
         <AnimatePresence>
           {toasts.map((t) => (
             <motion.div
               key={t.id}
-              layout
-              initial={{ opacity: 0, x: 50, scale: 0.9 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-              className="relative overflow-hidden bg-slate-900 border border-slate-700 shadow-xl rounded-xl p-4 pr-12 w-80 flex items-start gap-3"
+              initial={{ opacity: 0, y: 50, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
+              transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+              className="relative overflow-hidden bg-surface border border-ink/5 shadow-soft rounded-xl p-4 pr-12 w-80 flex items-start gap-3"
             >
-              {t.type === 'success' ? (
-                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-              ) : (
-                <XCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-              )}
-              <p className="text-sm text-slate-200">{t.message}</p>
-              
-              <button
+              <div className="shrink-0 mt-0.5">
+                {t.type === 'success' && <CheckCircle className="w-5 h-5 text-success" />}
+                {t.type === 'error' && <AlertCircle className="w-5 h-5 text-danger" />}
+                {t.type === 'info' && <Info className="w-5 h-5 text-accent" />}
+              </div>
+              <div className="flex-1 text-sm font-body font-medium text-ink">
+                {t.message}
+              </div>
+              <IconButton 
+                variant="ghost" 
+                size="sm" 
+                className="absolute right-2 top-2 h-8 w-8 text-ink/40 hover:text-ink/80" 
                 onClick={() => removeToast(t.id)}
-                className="absolute right-3 top-4 text-slate-500 hover:text-slate-300 transition-colors"
               >
                 <X className="w-4 h-4" />
-              </button>
-
-              {/* Progress Bar */}
+              </IconButton>
+              
               <motion.div
-                className={`absolute bottom-0 left-0 h-1 ${t.type === 'success' ? 'bg-emerald-500' : 'bg-red-500'}`}
                 initial={{ width: '100%' }}
-                animate={{ width: '0%' }}
-                transition={{ duration: 4, ease: 'linear' }}
+                animate={{ width: 0 }}
+                transition={{ duration: 5, ease: 'linear' }}
+                className={`absolute bottom-0 left-0 h-1 ${
+                  t.type === 'success' ? 'bg-success' : t.type === 'error' ? 'bg-danger' : 'bg-accent'
+                }`}
               />
             </motion.div>
           ))}
@@ -79,6 +81,6 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
 export const useToast = () => {
   const context = useContext(ToastContext);
-  if (!context) throw new Error('useToast must be used within ToastProvider');
+  if (context === undefined) throw new Error('useToast must be used within a ToastProvider');
   return context;
 };

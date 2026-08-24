@@ -1,29 +1,9 @@
 @import "tailwindcss";
-
-@theme {
-  --color-primary: #0B1220;
-  --color-background: #F7F8FA;
-  --color-accent: #12B7A5;
-
-  --color-urgency-low: #10B981;
-  --color-urgency-medium: #F59E0B;
-  --color-urgency-high: #EF4444;
-
-  --color-surface: #FFFFFF;
-  --color-surface-hover: #F1F5F9;
-
-  --font-sans: "Inter", sans-serif;
-  --font-display: "Inter Tight", sans-serif;
-
-  --radius-xl: 16px;
-  --radius-2xl: 24px;
-
-  --shadow-multi: 0 4px 6px -1px rgb(11 18 32 / 0.03), 0 10px 15px -3px rgb(11 18 32 / 0.03), 0 20px 25px -5px rgb(11 18 32 / 0.03);
-}
+@import "./styles/tokens.css";
 
 @layer base {
   body {
-    @apply bg-background text-primary antialiased font-sans;
+    @apply bg-bg text-ink antialiased font-body;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -33,7 +13,7 @@
 
 @layer utilities {
   .glass {
-    @apply bg-surface/70 backdrop-blur-md border border-primary/5;
+    @apply bg-surface/70 backdrop-blur-md border border-ink/5;
   }
   .animate-marquee {
     animation: marquee 30s linear infinite;

@@ -5,41 +5,43 @@ import { Link } from 'react-router-dom';
 import { useSearchDoctors } from './hooks/usePatientAPI';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { Card } from '../../components/ui/Card';
+import { EmptyState } from '../../components/ui/EmptyState';
 import { Spinner } from '../../components/ui/Spinner';
 import { Reveal, RevealItem } from '../../lib/motion/Reveal';
 import type { Doctor } from '../../types/appointment';
 
 const DoctorCard: React.FC<{ doctor: Doctor }> = ({ doctor }) => (
-  <div className="bg-surface border border-primary/5 rounded-2xl p-6 shadow-multi transition-all hover:border-accent/30 hover:-translate-y-1 flex flex-col h-full">
+  <Card className="transition-all hover:border-accent/30 hover:-translate-y-1 flex flex-col h-full">
     <div className="flex items-center gap-4 mb-4">
-      <div className="h-12 w-12 rounded-xl bg-background border border-primary/5 flex items-center justify-center flex-shrink-0">
-        <User className="h-6 w-6 text-slate-400" />
+      <div className="h-12 w-12 rounded-xl bg-bg border border-ink/5 flex items-center justify-center flex-shrink-0">
+        <User className="h-6 w-6 text-ink/40" />
       </div>
       <div>
-        <h3 className="text-lg font-bold text-primary">Dr. {doctor.firstName} {doctor.lastName}</h3>
+        <h3 className="text-lg font-display font-medium text-ink">Dr. {doctor.firstName} {doctor.lastName}</h3>
         <p className="text-sm font-medium text-accent">{doctor.specialisation}</p>
       </div>
     </div>
     
     <div className="flex-1">
       {doctor.bio && (
-        <p className="text-sm text-slate-500 mb-4 line-clamp-3">{doctor.bio}</p>
+        <p className="text-sm text-ink/60 mb-4 line-clamp-3">{doctor.bio}</p>
       )}
-      <div className="text-xs text-slate-400 mb-4 font-medium">
+      <div className="text-xs text-ink/50 mb-4 font-medium">
         {doctor.nextAvailableDate ? (
-          <span>Next available: <span className="text-primary font-bold">{doctor.nextAvailableDate}</span></span>
+          <span>Next available: <span className="text-ink font-bold">{doctor.nextAvailableDate}</span></span>
         ) : (
           <span>No slots currently published.</span>
         )}
       </div>
     </div>
 
-    <div className="pt-4 border-t border-primary/5 mt-auto">
+    <div className="pt-4 border-t border-ink/5 mt-auto">
       <Link to={`/patient/book/${doctor.id}`}>
         <Button className="w-full">Book Appointment</Button>
       </Link>
     </div>
-  </div>
+  </Card>
 );
 
 const DoctorSearch: React.FC = () => {
@@ -60,15 +62,15 @@ const DoctorSearch: React.FC = () => {
     <div className="p-8 max-w-7xl mx-auto">
       <div className="mb-8">
         <Reveal>
-          <h1 className="text-3xl text-primary mb-2">Find a Doctor</h1>
-          <p className="text-slate-500 font-medium">Search by specialisation or date to find the right care.</p>
+          <h1 className="text-3xl text-ink font-display mb-2">Find a Doctor</h1>
+          <p className="text-ink/60 font-body">Search by specialisation or date to find the right care.</p>
         </Reveal>
       </div>
 
       <Reveal delay={0.1}>
-        <div className="bg-surface border border-primary/5 shadow-multi rounded-2xl p-6 mb-8">
+        <Card className="mb-8">
           <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4 items-end">
-            <div className="flex-1">
+            <div className="flex-1 w-full">
               <Input
                 label="Specialisation"
                 placeholder="e.g. Cardiologist"
@@ -76,7 +78,7 @@ const DoctorSearch: React.FC = () => {
                 onChange={(e) => setSpecialisation(e.target.value)}
               />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 w-full">
               <Input
                 label="Date (Optional)"
                 type="date"
@@ -90,7 +92,7 @@ const DoctorSearch: React.FC = () => {
               Search
             </Button>
           </form>
-        </div>
+        </Card>
       </Reveal>
 
       {isLoading ? (
@@ -105,9 +107,13 @@ const DoctorSearch: React.FC = () => {
         </Reveal>
       ) : (
         <Reveal delay={0.2}>
-          <div className="text-center p-12 bg-surface border border-primary/5 shadow-multi rounded-2xl">
-            <p className="text-slate-500 font-medium">No doctors found matching your criteria.</p>
-          </div>
+          <Card className="py-16">
+            <EmptyState 
+              icon={Search} 
+              title="No doctors found" 
+              description="No doctors found matching your criteria." 
+            />
+          </Card>
         </Reveal>
       )}
     </div>
