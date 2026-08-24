@@ -1,95 +1,152 @@
-import { RefreshCw, BrainCircuit, AlertTriangle } from 'lucide-react';
+import React from 'react';
+import { BrainCircuit, RefreshCw, CheckCircle } from 'lucide-react';
 import { useFailedLLMSummaries, useRetryLLM } from './hooks/useAdminAPI';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
-import { Spinner } from '../../components/ui/Spinner';
 import { Card } from '../../components/ui/Card';
+import { Skeleton } from '../../components/ui/Skeleton';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '../../components/ui/Table';
 import { Reveal } from '../../lib/motion/Reveal';
+import { useToast } from '../../contexts/ToastContext';
 
 export const AdminLLMMonitor: React.FC = () => {
   const { data: failedSummaries, isLoading } = useFailedLLMSummaries();
   const { mutateAsync: retryLLM, isPending: isRetrying } = useRetryLLM();
+  const { toast } = useToast();
 
   const handleRetry = async (id: string, type: 'pre-visit' | 'post-visit') => {
     try {
       await retryLLM({ id, type });
-      alert(`Retry triggered for ${type} summary.`);
-    } catch (e) {
-      alert('Failed to trigger LLM retry.');
+      toast(`Retry triggered for ${type} summary.`, 'success');
+    } catch {
+      toast('Failed to trigger LLM retry.', 'error');
     }
   };
 
+  const typeLabel = (t: string) =>
+    t === 'pre-visit' ? 'Pre-Visit · Symptom Analysis' : 'Post-Visit · Clinical Notes';
+
+  const list = failedSummaries ?? [];
+  const count = list.length;
+
   return (
-    <div className="space-y-8 max-w-7xl mx-auto p-8">
+    <div className="space-y-6 max-w-7xl mx-auto p-6 md:p-8">
+      {/* Header */}
       <Reveal>
         <div>
-          <h1 className="text-3xl text-ink font-display mb-2">LLM Processing Monitor</h1>
-          <p className="text-ink/60 font-body">Monitor and retry failed AI-powered patient summaries.</p>
+          <h1 className="text-3xl font-display font-semibold text-ink mb-1">LLM Processing Monitor</h1>
+          <p className="text-ink/50 font-body text-sm">Monitor and retry failed AI-powered patient summaries.</p>
         </div>
       </Reveal>
 
-      <Reveal delay={0.1}>
-        <Card className="p-0 overflow-hidden">
+      {/* Health banner if all good */}
+      {!isLoading && count === 0 && (
+        <Reveal delay={0.06}>
+          <div className="flex items-center gap-3 p-5 rounded-xl bg-success/8 border border-success/20">
+            <div className="h-9 w-9 rounded-full bg-success/15 flex items-center justify-center flex-shrink-0">
+              <CheckCircle className="h-5 w-5 text-success" />
+            </div>
+            <div>
+              <p className="text-sm font-display font-semibold text-ink">All systems healthy</p>
+              <p className="text-xs text-ink/50 font-body">No failed LLM summaries detected. All AI processing is running normally.</p>
+            </div>
+          </div>
+        </Reveal>
+      )}
+
+      {/* Failed summaries table */}
+      <Reveal delay={0.08}>
+        <Card noPadding>
+          {/* Card header */}
+          <div className="px-6 py-4 border-b border-ink/5 flex items-center justify-between">
+            <h2 className="text-sm font-display font-semibold text-ink flex items-center gap-2">
+              <BrainCircuit className="h-4 w-4 text-accent" />
+              Failed Summaries
+              {count > 0 && (
+                <Badge variant="danger" className="text-[10px] ml-1">{count}</Badge>
+              )}
+            </h2>
+            {count > 0 && (
+              <p className="text-xs text-ink/40 font-body">Max 3 retries per job</p>
+            )}
+          </div>
+
           {isLoading ? (
-            <div className="flex justify-center p-12"><Spinner size="lg" /></div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-ink">
-                <thead className="bg-bg text-xs uppercase text-ink/50 font-bold border-b border-ink/5 tracking-wider">
-                  <tr>
-                    <th className="px-6 py-4 font-bold">Appointment ID</th>
-                    <th className="px-6 py-4 font-bold">Summary Type</th>
-                    <th className="px-6 py-4 font-bold">Status</th>
-                    <th className="px-6 py-4 font-bold">Retries</th>
-                    <th className="px-6 py-4 font-bold text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-ink/5 bg-surface">
-                  {failedSummaries?.map((summary: any) => (
-                    <tr key={summary.id} className="hover:bg-accent/5 transition-colors">
-                      <td className="px-6 py-4 font-mono text-xs text-ink/50 font-medium">
-                        {summary.appointmentId || summary.id}
-                      </td>
-                      <td className="px-6 py-4">
+            <div className="p-6 space-y-3">
+              {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}
+            </div>
+          ) : count > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="pl-6">Appointment ID</TableHead>
+                  <TableHead>Summary Type</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Retries</TableHead>
+                  <TableHead className="pr-6 text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {list.map((summary: any) => {
+                  const maxed = (summary.retryCount ?? 0) >= 3;
+                  return (
+                    <TableRow key={summary.id}>
+                      <TableCell className="pl-6">
+                        <span className="font-mono text-xs text-ink/50 bg-bg px-2 py-0.5 rounded border border-ink/5">
+                          {(summary.appointmentId || summary.id)?.slice(0, 12)}…
+                        </span>
+                      </TableCell>
+                      <TableCell>
                         <div className="flex items-center gap-2">
-                          <BrainCircuit className="h-4 w-4 text-ink/40" />
-                          <span className="font-bold text-ink">
-                            {summary.type === 'pre-visit' ? 'Pre-Visit (Symptom Analysis)' : 'Post-Visit (Clinical Notes)'}
+                          <BrainCircuit className="h-3.5 w-3.5 text-accent/60 flex-shrink-0" />
+                          <span className="text-sm font-medium text-ink">
+                            {typeLabel(summary.type)}
                           </span>
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <Badge variant="danger">FAILED</Badge>
-                      </td>
-                      <td className="px-6 py-4 font-medium">
-                        {summary.retryCount || 0} / 3
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <Button 
-                          size="sm" 
-                          variant="secondary"
-                          onClick={() => handleRetry(summary.id, summary.type)}
-                          isLoading={isRetrying}
-                        >
-                          <RefreshCw className="h-3 w-3 mr-2" />
-                          Retry
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                  {(!failedSummaries || failedSummaries.length === 0) && (
-                    <tr>
-                      <td colSpan={5} className="px-6 py-16 text-center">
-                        <div className="flex flex-col items-center justify-center text-ink/50">
-                          <AlertTriangle className="h-10 w-10 text-success/50 mb-3" />
-                          <p className="text-ink/60 font-bold">All systems healthy</p>
-                          <p className="text-xs mt-1 font-medium text-ink/40">No failed LLM summaries detected.</p>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="danger" className="text-[10px]">FAILED</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5">
+                          {/* Mini progress dots */}
+                          {[0, 1, 2].map(n => (
+                            <span
+                              key={n}
+                              className={`h-2 w-2 rounded-full ${n < (summary.retryCount ?? 0) ? 'bg-danger' : 'bg-ink/10'}`}
+                            />
+                          ))}
+                          <span className="text-xs text-ink/50 ml-1">{summary.retryCount ?? 0}/3</span>
                         </div>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                      </TableCell>
+                      <TableCell className="pr-6 text-right">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          disabled={maxed || isRetrying}
+                          isLoading={isRetrying}
+                          onClick={() => handleRetry(summary.id, summary.type)}
+                          className="text-xs"
+                        >
+                          <RefreshCw className="h-3 w-3 mr-1.5" />
+                          {maxed ? 'Max Retries' : 'Retry'}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="py-12 text-center">
+              <p className="text-sm text-ink/40 font-body">No failed summaries to display.</p>
             </div>
           )}
         </Card>

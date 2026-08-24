@@ -30,6 +30,7 @@ const DoctorAppointments = lazy(() => import('../features/doctor/DoctorAppointme
 const PostVisitNotes = lazy(() => import('../features/doctor/PostVisitNotes'));
 
 // Admin
+const AdminDashboard = lazy(() => import('../features/admin/AdminDashboard'));
 const AdminDoctors = lazy(() => import('../features/admin/AdminDoctors'));
 const AdminLeave = lazy(() => import('../features/admin/AdminLeave'));
 const AdminNotifications = lazy(() => import('../features/admin/AdminNotifications'));
@@ -83,7 +84,7 @@ export const AppRouter: React.FC = () => (
       {/* ── Admin ─────────────────────────────────────── */}
       <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
         <Route element={<AdminLayout />}>
-          <Route path="/admin/dashboard" element={<Navigate to="/admin/doctors" replace />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/doctors" element={<AdminDoctors />} />
           <Route path="/admin/leave" element={<AdminLeave />} />
           <Route path="/admin/notifications" element={<AdminNotifications />} />

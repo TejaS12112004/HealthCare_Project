@@ -1,108 +1,183 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { format, parseISO } from 'date-fns';
-import { RefreshCw, Mail } from 'lucide-react';
+import { RefreshCw, Mail, Search } from 'lucide-react';
 import { useEmailLogs, useRetryAllEmails } from './hooks/useAdminAPI';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
-import { Spinner } from '../../components/ui/Spinner';
 import { Card } from '../../components/ui/Card';
-import { Select } from '../../components/ui/Select';
+import { EmptyState } from '../../components/ui/EmptyState';
+import { Skeleton } from '../../components/ui/Skeleton';
+import { Pagination } from '../../components/ui/Pagination';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '../../components/ui/Table';
+import { Tabs } from '../../components/ui/Tabs';
 import { Reveal } from '../../lib/motion/Reveal';
+import { useToast } from '../../contexts/ToastContext';
+
+const STATUS_TABS = [
+  { label: 'All', id: '' },
+  { label: 'Sent', id: 'SENT' },
+  { label: 'Pending', id: 'PENDING' },
+  { label: 'Failed', id: 'FAILED' },
+];
+
+const PAGE_SIZE = 15;
 
 export const AdminNotifications: React.FC = () => {
-  const [statusFilter, setStatusFilter] = useState<string>('');
-  
-  const { data: emails, isLoading } = useEmailLogs(statusFilter);
+  const [statusFilter, setStatusFilter] = useState('');
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(0);
+  const { toast } = useToast();
+
+  const { data: emails, isLoading } = useEmailLogs(statusFilter || undefined);
   const { mutateAsync: retryEmails, isPending: isRetrying } = useRetryAllEmails();
 
   const handleRetry = async () => {
     try {
       await retryEmails();
-      alert('Retry job triggered successfully. Logs will update shortly.');
-    } catch (e) {
-      alert('Failed to trigger retry job.');
+      toast('Retry job triggered. Logs will update shortly.', 'success');
+    } catch {
+      toast('Failed to trigger retry job.', 'error');
     }
   };
 
+  /* Client-side search */
+  const filtered = (emails ?? []).filter((log: any) => {
+    const q = search.toLowerCase();
+    return (
+      !q ||
+      log.recipientEmail?.toLowerCase().includes(q) ||
+      log.emailType?.toLowerCase().includes(q)
+    );
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paged = filtered.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+
+  const statusVariant = (s: string) => {
+    if (s === 'SENT') return 'success';
+    if (s === 'FAILED') return 'danger';
+    return 'warning';
+  };
+
   return (
-    <div className="space-y-8 max-w-7xl mx-auto p-8">
-      <Reveal className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl text-ink font-display mb-2">Notifications Monitor</h1>
-          <p className="text-ink/60 font-body">Monitor email delivery logs and retry failed messages.</p>
+    <div className="space-y-6 max-w-7xl mx-auto p-6 md:p-8">
+      {/* Header */}
+      <Reveal>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-display font-semibold text-ink mb-1">Email Monitor</h1>
+            <p className="text-ink/50 font-body text-sm">Track email delivery and retry failed messages.</p>
+          </div>
+          <Button variant="secondary" onClick={handleRetry} isLoading={isRetrying} className="flex-shrink-0">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry Failed Emails
+          </Button>
         </div>
-        <Button onClick={handleRetry} isLoading={isRetrying} variant="secondary">
-          <RefreshCw className="h-5 w-5 mr-2" />
-          Retry Failed Emails
-        </Button>
       </Reveal>
 
-      <Reveal delay={0.1}>
-        <Card className="p-0 overflow-hidden">
-          <div className="p-6 border-b border-ink/5 flex justify-end bg-bg">
-            <div className="w-48">
-              <Select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                options={[
-                  { label: 'All Statuses', value: '' },
-                  { label: 'Pending', value: 'PENDING' },
-                  { label: 'Sent', value: 'SENT' },
-                  { label: 'Failed', value: 'FAILED' },
-                ]}
-              />
-            </div>
+      {/* Filters */}
+      <Reveal delay={0.05}>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <Tabs
+            tabs={STATUS_TABS}
+            activeTab={statusFilter}
+            onChange={id => { setStatusFilter(id); setPage(0); }}
+            layoutId="notif-tabs"
+          />
+          <div className="relative flex-shrink-0">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-ink/30 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search recipient, type…"
+              value={search}
+              onChange={e => { setSearch(e.target.value); setPage(0); }}
+              className="pl-8 pr-3 h-9 text-xs font-body rounded-lg bg-surface border border-ink/10 text-ink placeholder:text-ink/30 focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-all w-52"
+            />
           </div>
+        </div>
+      </Reveal>
 
+      {/* Table */}
+      <Reveal delay={0.1}>
+        <Card noPadding>
           {isLoading ? (
-            <div className="flex justify-center p-12"><Spinner size="lg" /></div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-ink">
-                <thead className="bg-bg text-xs uppercase text-ink/50 font-bold border-b border-ink/5 tracking-wider">
-                  <tr>
-                    <th className="px-6 py-4 font-bold">Recipient</th>
-                    <th className="px-6 py-4 font-bold">Type</th>
-                    <th className="px-6 py-4 font-bold">Status</th>
-                    <th className="px-6 py-4 font-bold">Retries</th>
-                    <th className="px-6 py-4 font-bold">Sent At</th>
-                    <th className="px-6 py-4 font-bold">Error Message</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-ink/5 bg-surface">
-                  {emails?.map(log => (
-                    <tr key={log.id} className="hover:bg-accent/5 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="font-bold text-ink flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-ink/40" />
-                          {log.recipientEmail}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 font-medium">{log.emailType}</td>
-                      <td className="px-6 py-4">
-                        {log.status === 'SENT' ? <Badge variant="success">SENT</Badge> : 
-                         log.status === 'FAILED' ? <Badge variant="danger">FAILED</Badge> : 
-                         <Badge variant="warning">PENDING</Badge>}
-                      </td>
-                      <td className="px-6 py-4 font-medium">{log.retryCount}/3</td>
-                      <td className="px-6 py-4 whitespace-nowrap font-medium text-ink/60">
-                        {log.sentAt ? format(parseISO(log.sentAt), 'MMM d, h:mm a') : '-'}
-                      </td>
-                      <td className="px-6 py-4 text-xs font-medium text-danger max-w-xs truncate" title={log.errorMessage}>
-                        {log.errorMessage || '-'}
-                      </td>
-                    </tr>
-                  ))}
-                  {(!emails || emails.length === 0) && (
-                    <tr>
-                      <td colSpan={6} className="px-6 py-12 text-center text-ink/50 font-medium">
-                        No email logs found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+            <div className="p-6 space-y-3">
+              {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}
             </div>
+          ) : paged.length === 0 ? (
+            <div className="py-16">
+              <EmptyState icon={Mail} title="No email logs" description="No emails match the current filter." />
+            </div>
+          ) : (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="pl-6">Recipient</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="hidden md:table-cell">Retries</TableHead>
+                    <TableHead className="hidden lg:table-cell">Sent At</TableHead>
+                    <TableHead className="pr-6 hidden lg:table-cell">Error</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paged.map((log: any) => (
+                    <TableRow key={log.id}>
+                      <TableCell className="pl-6">
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-3.5 w-3.5 text-ink/30 flex-shrink-0" />
+                          <span className="text-sm font-medium text-ink truncate max-w-xs">
+                            {log.recipientEmail}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-xs font-mono bg-bg px-2 py-0.5 rounded border border-ink/5 text-ink/70">
+                          {log.emailType}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={statusVariant(log.status)} className="text-[10px]">
+                          {log.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell text-sm text-ink/60">
+                        {log.retryCount}/3
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell text-sm text-ink/60 whitespace-nowrap">
+                        {log.sentAt ? format(parseISO(log.sentAt), 'MMM d, h:mm a') : '—'}
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell pr-6">
+                        {log.errorMessage ? (
+                          <span
+                            className="text-xs text-danger font-medium truncate block max-w-[200px]"
+                            title={log.errorMessage}
+                          >
+                            {log.errorMessage}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-ink/30">—</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
+            </>
           )}
         </Card>
       </Reveal>
