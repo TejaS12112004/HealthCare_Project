@@ -51,6 +51,10 @@ WellPoint was designed with a **"classy, clinical-modern, and calm"** aesthetic.
 
 <div align="center">
 
+<img src="docs/screenshots/landing-page.png" width="800" alt="WellPoint Landing Page" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" />
+
+<br/><br/>
+
 | Patient Dashboard | Doctor Appointments |
 | :---: | :---: |
 | <img src="docs/screenshots/patient-dashboard.png" width="400" alt="Patient Dashboard Placeholder" /> | <img src="docs/screenshots/doctor-appointments.png" width="400" alt="Doctor Appointments Placeholder" /> |
@@ -59,7 +63,7 @@ WellPoint was designed with a **"classy, clinical-modern, and calm"** aesthetic.
 | :---: | :---: |
 | <img src="docs/screenshots/ai-notes.png" width="400" alt="AI Notes Placeholder" /> | <img src="docs/screenshots/admin-portal.png" width="400" alt="Admin Portal Placeholder" /> |
 
-*(Replace `docs/screenshots/...` with the actual paths to your screenshot files!)*
+*(Replace the remaining `docs/screenshots/...` placeholders with the actual paths to your other screenshot files!)*
 
 </div>
 
