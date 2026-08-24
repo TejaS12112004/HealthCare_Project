@@ -1,6 +1,8 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
-import { Calendar, ClipboardList, Home, LogOut, User } from 'lucide-react';
+import { Calendar, Home, LogOut, AlertCircle, ClipboardList, User } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import apiClient from '../api/apiClient';
+import { ENDPOINTS } from '../api/endpoints';
 import { cn } from '../lib/utils';
 
 const navItems = [
@@ -10,6 +12,15 @@ const navItems = [
 
 export const DoctorLayout: React.FC = () => {
   const { user, logout } = useAuth();
+
+  const handleConnectCalendar = async () => {
+    try {
+      const { data } = await apiClient.get<{ url: string }>(ENDPOINTS.CALENDAR.AUTH_URL);
+      window.location.href = data.url;
+    } catch (e) {
+      alert('Failed to initiate calendar connection.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-950 flex">
@@ -63,8 +74,24 @@ export const DoctorLayout: React.FC = () => {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-auto">
-        <Outlet />
+      <main className="flex-1 overflow-y-auto">
+        {user?.googleCalendarConnected === false && (
+          <div className="bg-amber-500/10 border-b border-amber-500/20 px-8 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-amber-500 text-sm">
+              <AlertCircle className="h-4 w-4" />
+              <span>Connect Google Calendar to automatically sync your appointments.</span>
+            </div>
+            <button
+              onClick={handleConnectCalendar}
+              className="text-xs font-medium bg-amber-500 text-amber-950 px-3 py-1.5 rounded hover:bg-amber-400 transition-colors"
+            >
+              Connect Now
+            </button>
+          </div>
+        )}
+        <div className="p-8">
+          <Outlet />
+        </div>
       </main>
     </div>
   );
