@@ -43,4 +43,7 @@ public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
     Page<Doctor> searchDoctors(@Param("query") String query, Pageable pageable);
 
     long countByIsAvailable(Boolean isAvailable);
+
+    /** Admin filter: all doctors (including unavailable) under a given specialisation. */
+    Page<Doctor> findBySpecialisationId(UUID specialisationId, Pageable pageable);
 }
