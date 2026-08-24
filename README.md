@@ -17,9 +17,13 @@
 
 [Architecture & Pipelines](#-system-architecture--pipelines) • [Concurrency & Slot Hold](#-concurrency--conflict-resolution-system-design) • [Database Schema](#-database-schema--entity-relationships) • [API Reference](#-api-documentation) • [LLM Prompts](#-llm-prompts--ai-intelligence) • [Google Calendar](#-google-calendar-integration) • [Local Setup](#-installation--setup-guide)
 
----
+<br/>
+
+<img src="docs/screenshots/landing-page.png" width="850" alt="WellPoint Landing Page" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);" />
 
 </div>
+
+---
 
 ## 📑 Table of Contents
 1. [System Architecture & Pipelines](#-system-architecture--pipelines)
@@ -47,25 +51,25 @@
 flowchart TB
     subgraph Clients["Clients & Edge Tier"]
         Browser["Desktop & Mobile Browsers"]
-        VercelEdge["Vercel Global Edge CDN<br/>(React 18 + Vite SPA)"]
+        VercelEdge["Vercel Global Edge CDN (React 18 + Vite SPA)"]
     end
 
     subgraph BackendTier["Application Backend Tier (Render / Docker)"]
-        Gateway["Spring Boot Security & Filter Chain<br/>(Stateless JWT Auth)"]
-        Controllers["REST Controllers<br/>(Auth, Patient, Doctor, Admin, Calendar)"]
-        Services["Domain Services & Transactions<br/>(@Transactional / Spring AOP)"]
-        Schedulers["Background Schedulers<br/>(@Scheduled Tasks)"]
+        Gateway["Spring Boot Security & Filter Chain (Stateless JWT Auth)"]
+        Controllers["REST Controllers (Auth, Patient, Doctor, Admin, Calendar)"]
+        Services["Domain Services & Transactions (@Transactional / Spring AOP)"]
+        Schedulers["Background Schedulers (@Scheduled Tasks)"]
     end
 
     subgraph Persistence["Persistence Tier (Supabase)"]
-        Postgres[("PostgreSQL 15+<br/>(healthcare_dev schema)") ]
-        Flyway["Flyway Migration Engine<br/>(V1 to V7 Migrations)"]
+        Postgres[("PostgreSQL 15+ Database (healthcare_dev schema)")]
+        Flyway["Flyway Migration Engine (V1 to V7 Migrations)"]
     end
 
     subgraph ExternalServices["External APIs & Services"]
-        Groq["Groq Cloud API<br/>(Llama-3-8B-8192 Fast Inference)"]
-        GCalendar["Google Calendar API v3<br/>(OAuth 2.0 Two-Way Sync)"]
-        Gmail["Gmail SMTP Server<br/>(TLS Port 587 Notification Engine)"]
+        Groq["Groq Cloud API (Llama-3-8B-8192 Fast Inference)"]
+        GCalendar["Google Calendar API v3 (OAuth 2.0 Two-Way Sync)"]
+        Gmail["Gmail SMTP Server (TLS Port 587 Notification Engine)"]
     end
 
     Browser -->|HTTPS / WSS| VercelEdge
@@ -142,21 +146,21 @@ When an administrator schedules a doctor leave, the system executes an atomic ca
 
 ```mermaid
 flowchart TD
-    A([Admin Marks Doctor Leave Day]) --> B[POST /api/v1/admin/doctors/{id}/leave]
-    B --> C[Validate: No Existing Leave for Date]
-    C --> D[Insert record into doctor_leave_days]
-    D --> E[Query appointments for Doctor & Date WHERE status in 'PENDING', 'CONFIRMED']
+    A(["Admin Marks Doctor Leave Day"]) --> B["POST /api/v1/admin/doctors/:id/leave"]
+    B --> C["Validate: No Existing Leave for Date"]
+    C --> D["Insert record into doctor_leave_days"]
+    D --> E["Query appointments for Doctor & Date WHERE status in PENDING, CONFIRMED"]
     
-    E --> F{Any Conflicting Appointments Found?}
-    F -- No Conflicts --> G[Return 200 OK with affectedCount = 0]
+    E --> F{"Any Conflicting Appointments Found?"}
+    F -->|No Conflicts| G["Return 200 OK with affectedCount = 0"]
     
-    F -- Conflicts Found --> H[Atomic Status Update: Set status = 'CANCELLED']
-    H --> I[Queue Cancellation Emails in email_logs table]
-    I --> J[Return 200 OK + List of Cancelled Patients to Admin Modal]
+    F -->|Conflicts Found| H["Atomic Status Update: Set status = 'CANCELLED'"]
+    H --> I["Queue Cancellation Emails in email_logs table"]
+    I --> J["Return 200 OK + List of Cancelled Patients to Admin Modal"]
     
-    J --> K[Async Background Email Sender Sweeps Queue]
-    K --> L[Dispatch Personalized Cancellation & Reschedule Email via SMTP]
-    L --> M[Update email_logs: status = 'SENT']
+    J --> K["Async Background Email Sender Sweeps Queue"]
+    K --> L["Dispatch Personalized Cancellation & Reschedule Email via SMTP"]
+    L --> M["Update email_logs: status = 'SENT'"]
 ```
 
 ---
