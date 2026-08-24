@@ -37,4 +37,12 @@ public interface EmailLogRepository extends JpaRepository<EmailLog, UUID> {
                       @Param("status") EmailStatus status,
                       @Param("sentAt") LocalDateTime sentAt,
                       @Param("error") String error);
+
+    @Query("""
+           SELECT COUNT(e) > 0 FROM EmailLog e
+           WHERE e.appointment.id = :appointmentId
+           AND e.emailType = 'BOOKING_REMINDER'
+           AND e.createdAt >= :since
+           """)
+    boolean hasRecentReminder(@Param("appointmentId") UUID appointmentId, @Param("since") LocalDateTime since);
 }

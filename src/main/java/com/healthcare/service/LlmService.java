@@ -15,6 +15,7 @@ import com.healthcare.repository.PreVisitSummaryRepository;
 import com.healthcare.repository.SymptomFormRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,7 @@ public class LlmService {
     private final PostVisitSummaryRepository postVisitSummaryRepository;
     private final PostVisitNoteRepository postVisitNoteRepository;
     private final ObjectMapper objectMapper;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Async("llm-executor")
     public void generatePreVisitSummary(UUID appointmentId) {
@@ -145,6 +147,8 @@ public class LlmService {
             pvs.setLlmStatus(LlmStatus.COMPLETED);
             postVisitSummaryRepository.save(pvs);
             log.info("Successfully generated post-visit summary for appointment {}", appointmentId);
+            
+            applicationEventPublisher.publishEvent(new com.healthcare.event.PostVisitSummaryGeneratedEvent(this, appointmentId));
             
         } catch (Exception e) {
             log.error("Failed to generate post-visit summary for appointment {}", appointmentId, e);

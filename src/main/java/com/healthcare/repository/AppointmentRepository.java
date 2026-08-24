@@ -82,4 +82,19 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT a FROM Appointment a WHERE a.id = :id")
     Optional<Appointment> findByIdForUpdate(@Param("id") UUID id);
+
+    @Query("""
+           SELECT a FROM Appointment a
+           WHERE a.status = 'CONFIRMED'
+           AND (
+               (a.slotTime BETWEEN :start24h AND :end24h)
+               OR
+               (a.slotTime BETWEEN :start1h AND :end1h)
+           )
+           """)
+    List<Appointment> findAppointmentsForReminders(
+            @Param("start24h") LocalDateTime start24h,
+            @Param("end24h") LocalDateTime end24h,
+            @Param("start1h") LocalDateTime start1h,
+            @Param("end1h") LocalDateTime end1h);
 }

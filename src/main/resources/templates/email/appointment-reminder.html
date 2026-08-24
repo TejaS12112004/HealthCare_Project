@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { padding: 20px; border: 1px solid #ddd; max-width: 600px; margin: 0 auto; }
+        .header { background-color: #ffeb3b; padding: 10px; text-align: center; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">Appointment Reminder</div>
+    <p>Dear <span th:text="${patientName}">Patient</span>,</p>
+    <p>This is a reminder for your upcoming appointment with Dr. <span th:text="${doctorName}">Doctor</span>.</p>
+    <p>Your appointment starts in approximately <span th:text="${hoursRemaining}">X</span> hours.</p>
+    <p><strong>Preparation Tips:</strong></p>
+    <ul>
+        <li>Ensure you have a stable internet connection.</li>
+        <li>Find a quiet place for the consultation.</li>
+        <li>Have any recent medical records ready.</li>
+    </ul>
+    <p>See you soon!</p>
+</div>
+</body>
+</html>
