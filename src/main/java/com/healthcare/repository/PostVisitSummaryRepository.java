@@ -1,6 +1,7 @@
 package com.healthcare.repository;
 
 import com.healthcare.model.entity.PostVisitSummary;
+import com.healthcare.model.enums.LlmStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +15,8 @@ import java.util.UUID;
 public interface PostVisitSummaryRepository extends JpaRepository<PostVisitSummary, UUID> {
 
     Optional<PostVisitSummary> findByAppointmentId(UUID appointmentId);
+
+    List<PostVisitSummary> findByLlmStatusAndRetryCountLessThan(LlmStatus status, Integer maxRetries);
 
     @Query("""
            SELECT p FROM PostVisitSummary p

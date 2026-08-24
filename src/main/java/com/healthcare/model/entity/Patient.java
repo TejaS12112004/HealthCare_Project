@@ -66,6 +66,10 @@ public class Patient {
     @Column(name = "pincode", length = 10)
     private String pincode;
 
+    @Column(name = "timezone", length = 50, nullable = false)
+    @Builder.Default
+    private String timezone = "Asia/Kolkata";
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

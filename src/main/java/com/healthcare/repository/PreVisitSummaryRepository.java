@@ -16,6 +16,8 @@ public interface PreVisitSummaryRepository extends JpaRepository<PreVisitSummary
 
     Optional<PreVisitSummary> findByAppointmentId(UUID appointmentId);
 
+    List<PreVisitSummary> findByLlmStatusAndRetryCountLessThan(LlmStatus status, Integer maxRetries);
+
     /** Fetch pending/failed summaries eligible for LLM retry. */
     @Query("""
            SELECT p FROM PreVisitSummary p
