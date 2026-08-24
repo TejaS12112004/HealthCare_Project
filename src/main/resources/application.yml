@@ -71,9 +71,9 @@ jwt:
   expiry-ms: ${JWT_EXPIRY_MS:900000}
   refresh-expiry-ms: ${JWT_REFRESH_EXPIRY_MS:604800000}
 
-# ===== GOOGLE GEMINI =====
-gemini:
-  api-key: ${GEMINI_API_KEY}
+# ===== LLM =====
+llm:
+  provider: ${LLM_PROVIDER:openai}
 
 # ===== GOOGLE CALENDAR OAUTH 2.0 =====
 google:
