@@ -38,7 +38,7 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, title, children
             exit={{ x: `${slideDirection}%` }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             className={cn(
-              'fixed top-0 bottom-0 z-50 w-full max-w-sm bg-surface shadow-soft border-primary/5 flex flex-col',
+              'fixed top-0 bottom-0 z-50 w-full max-w-sm bg-surface shadow-soft border-ink/5 flex flex-col',
               position === 'right' ? 'right-0 border-l' : 'left-0 border-r'
             )}
           >
