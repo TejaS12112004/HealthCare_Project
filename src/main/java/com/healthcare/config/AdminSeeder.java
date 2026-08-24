@@ -5,6 +5,7 @@ import com.healthcare.model.enums.Role;
 import com.healthcare.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -18,12 +19,15 @@ public class AdminSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${admin.default.email:tekadet10@gmail.com}")
+    private String adminEmail;
+
+    @Value("${admin.default.password:admin@123}")
+    private String adminPassword;
+
     @Override
     @Transactional
     public void run(String... args) {
-        String adminEmail = "tekadet10@gmail.com";
-        String adminPassword = "admin@123";
-
         if (!userRepository.existsByEmail(adminEmail)) {
             User admin = User.builder()
                     .firstName("System")
@@ -33,6 +37,8 @@ public class AdminSeeder implements CommandLineRunner {
                     .role(Role.ADMIN)
                     .isActive(true)
                     .isEmailVerified(true)
+                    .createdAt(java.time.LocalDateTime.now())
+                    .updatedAt(java.time.LocalDateTime.now())
                     .build();
 
             userRepository.save(admin);

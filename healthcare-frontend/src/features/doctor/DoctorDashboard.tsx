@@ -17,7 +17,7 @@ const UrgencyBadge: React.FC<{ appointment: Appointment }> = ({ appointment }) =
   
   if (!appointment.preVisitSummary || appointment.preVisitSummary.llmStatus === 'PENDING') {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-400 text-xs font-medium border border-indigo-500/20">
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-accent/10 text-accent text-xs font-bold border border-accent/20">
         <Spinner size="sm" className="h-3 w-3" />
         Analysing…
       </span>
@@ -51,110 +51,116 @@ const DoctorDashboard: React.FC = () => {
   const totalToday = appointments?.length || 0;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      <header>
-        <h1 className="text-3xl font-bold text-white mb-2">Welcome back, Dr. {user?.lastName}!</h1>
-        <p className="text-slate-400">Here is your schedule and patient overview for today.</p>
-      </header>
+    <div className="max-w-7xl mx-auto space-y-8 p-8">
+      <Reveal>
+        <header>
+          <h1 className="text-3xl text-primary mb-2">Welcome back, Dr. {user?.lastName}!</h1>
+          <p className="text-slate-500 font-medium">Here is your schedule and patient overview for today.</p>
+        </header>
+      </Reveal>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-indigo-500/20 flex items-center justify-center">
-            <Calendar className="h-6 w-6 text-indigo-400" />
+      <Reveal delay={0.1}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-surface border border-primary/5 rounded-2xl p-6 shadow-multi flex items-center gap-4">
+            <div className="h-14 w-14 rounded-2xl bg-accent/10 flex items-center justify-center">
+              <Calendar className="h-7 w-7 text-accent" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Today</p>
+              <p className="text-3xl font-bold text-primary">{totalToday}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-medium text-slate-400">Total Today</p>
-            <p className="text-2xl font-bold text-white">{totalToday}</p>
+          
+          <div className="bg-surface border border-primary/5 rounded-2xl p-6 shadow-multi flex items-center gap-4">
+            <div className="h-14 w-14 rounded-2xl bg-amber-50 flex items-center justify-center">
+              <FileText className="h-7 w-7 text-amber-500" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Pending Notes</p>
+              <p className="text-3xl font-bold text-primary">{pendingNotes.length}</p>
+            </div>
           </div>
-        </div>
-        
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-amber-500/20 flex items-center justify-center">
-            <FileText className="h-6 w-6 text-amber-400" />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-slate-400">Pending Notes</p>
-            <p className="text-2xl font-bold text-white">{pendingNotes.length}</p>
-          </div>
-        </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
-            <CheckCircle className="h-6 w-6 text-emerald-400" />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-slate-400">Completed</p>
-            <p className="text-2xl font-bold text-white">{completedToday.length}</p>
+          <div className="bg-surface border border-primary/5 rounded-2xl p-6 shadow-multi flex items-center gap-4">
+            <div className="h-14 w-14 rounded-2xl bg-emerald-50 flex items-center justify-center">
+              <CheckCircle className="h-7 w-7 text-emerald-500" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Completed</p>
+              <p className="text-3xl font-bold text-primary">{completedToday.length}</p>
+            </div>
           </div>
         </div>
-      </div>
+      </Reveal>
 
       {/* Today's Appointments List */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-        <div className="px-6 py-5 border-b border-slate-800 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">Today's Appointments</h2>
-          <span className="text-sm text-slate-400">{format(new Date(), 'EEEE, MMMM d, yyyy')}</span>
+      <Reveal delay={0.2}>
+        <div className="bg-surface border border-primary/5 rounded-2xl overflow-hidden shadow-multi">
+          <div className="px-8 py-6 border-b border-primary/5 flex items-center justify-between bg-background/50">
+            <h2 className="text-xl text-primary font-bold">Today's Appointments</h2>
+            <span className="text-sm font-bold text-slate-500">{format(new Date(), 'EEEE, MMMM d, yyyy')}</span>
+          </div>
+
+          {isLoading ? (
+            <div className="flex flex-col gap-4 p-8">
+              <Skeleton className="h-20 w-full rounded-2xl" />
+              <Skeleton className="h-20 w-full rounded-2xl" />
+              <Skeleton className="h-20 w-full rounded-2xl" />
+            </div>
+          ) : appointments && appointments.length > 0 ? (
+            <Reveal stagger={0.04} className="divide-y divide-primary/5">
+              {appointments.map((apt) => (
+                <RevealItem key={apt.id}>
+                  <Link 
+                    to={`/doctor/appointments/${apt.id}`}
+                    className={cn(
+                      "flex items-center justify-between p-6 hover:bg-surface-hover hover:-translate-y-[2px] transition-all duration-200 group",
+                      apt.status === 'COMPLETED' && "opacity-70"
+                    )}
+                  >
+                    <div className="flex items-center gap-6 flex-1">
+                      <div className="flex flex-col text-primary font-bold w-24">
+                        <span className="font-bold text-primary">{format(parseISO(apt.slotTime), 'h:mm a')}</span>
+                        <span className="text-xs font-medium text-slate-500">30 min</span>
+                      </div>
+                      
+                      <div className="h-12 w-12 rounded-2xl bg-background flex items-center justify-center group-hover:bg-accent/10 transition-colors">
+                        <User className="h-6 w-6 text-slate-400 group-hover:text-accent" />
+                      </div>
+
+                      <div className="flex-1">
+                        <div className="font-bold text-primary text-lg">
+                        {apt.patient 
+                          ? (apt.patient as any).name || `${apt.patient.firstName} ${apt.patient.lastName}`
+                          : (apt as any).patientName || 'Unknown Patient'}
+                      </div>
+                        {apt.symptomForm?.symptoms && (
+                          <p className="text-sm font-medium text-slate-500 truncate max-w-md">
+                            {apt.symptomForm.symptoms}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-6">
+                      <div className="hidden md:block">
+                        <UrgencyBadge appointment={apt} />
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-accent transition-colors" />
+                    </div>
+                  </Link>
+                </RevealItem>
+              ))}
+            </Reveal>
+          ) : (
+            <div className="p-16 text-center text-slate-500 font-medium">
+              <Calendar className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+              <p>You have no appointments scheduled for today.</p>
+            </div>
+          )}
         </div>
-
-        {isLoading ? (
-          <div className="flex flex-col gap-4 p-6">
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-20 w-full" />
-          </div>
-        ) : appointments && appointments.length > 0 ? (
-          <Reveal stagger={0.04} className="divide-y divide-slate-800">
-            {appointments.map((apt) => (
-              <RevealItem key={apt.id}>
-                <Link 
-                  to={`/doctor/appointments/${apt.id}`}
-                  className={cn(
-                    "flex items-center justify-between p-6 hover:bg-slate-800/50 hover:-translate-y-[2px] hover:shadow-lg transition-all duration-200 group",
-                    apt.status === 'COMPLETED' && "opacity-70"
-                  )}
-                >
-                  <div className="flex items-center gap-6 flex-1">
-                    <div className="flex flex-col text-slate-300 w-24">
-                      <span className="font-semibold text-white">{format(parseISO(apt.slotTime), 'h:mm a')}</span>
-                      <span className="text-xs text-slate-500">30 min</span>
-                    </div>
-                    
-                    <div className="h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors">
-                      <User className="h-5 w-5 text-slate-400 group-hover:text-indigo-400" />
-                    </div>
-
-                    <div className="flex-1">
-                      <div className="font-medium text-slate-200">
-                      {apt.patient 
-                        ? (apt.patient as any).name || `${apt.patient.firstName} ${apt.patient.lastName}`
-                        : (apt as any).patientName || 'Unknown Patient'}
-                    </div>
-                      {apt.symptomForm?.symptoms && (
-                        <p className="text-sm text-slate-400 truncate max-w-md">
-                          {apt.symptomForm.symptoms}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-6">
-                    <div className="hidden md:block">
-                      <UrgencyBadge appointment={apt} />
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-slate-600 group-hover:text-indigo-400 transition-colors" />
-                  </div>
-                </Link>
-              </RevealItem>
-            ))}
-          </Reveal>
-        ) : (
-          <div className="p-12 text-center text-slate-400">
-            <Calendar className="h-12 w-12 text-slate-700 mx-auto mb-4" />
-            <p>You have no appointments scheduled for today.</p>
-          </div>
-        )}
-      </div>
+      </Reveal>
     </div>
   );
 };

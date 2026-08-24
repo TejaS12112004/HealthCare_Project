@@ -1,4 +1,4 @@
-import { FaTwitter, FaLinkedin, FaGithub } from 'react-icons/fa';
+import { Heart, Activity, Globe, MessageCircle, Mail } from 'lucide-react';
 import { MagneticButton } from '../lib/motion/MagneticButton';
 
 export const Footer = () => {
@@ -13,11 +13,6 @@ export const Footer = () => {
           <p className="text-sm text-slate-400 mb-6 max-w-xs">
             AI-assisted care coordination platform built for modern healthcare providers.
           </p>
-          <div className="flex gap-4">
-            <MagneticButton><a href="#" className="p-2 bg-slate-800 rounded-full flex hover:bg-accent hover:text-white transition-colors" data-cursor="hover"><FaTwitter className="w-4 h-4" /></a></MagneticButton>
-            <MagneticButton><a href="#" className="p-2 bg-slate-800 rounded-full flex hover:bg-accent hover:text-white transition-colors" data-cursor="hover"><FaLinkedin className="w-4 h-4" /></a></MagneticButton>
-            <MagneticButton><a href="#" className="p-2 bg-slate-800 rounded-full flex hover:bg-accent hover:text-white transition-colors" data-cursor="hover"><FaGithub className="w-4 h-4" /></a></MagneticButton>
-          </div>
         </div>
 
         <div>
@@ -42,11 +37,20 @@ export const Footer = () => {
 
         <div>
           <h3 className="text-white font-medium mb-4">Legal</h3>
-          <ul className="space-y-3 text-sm">
-            <li><a href="#" className="hover:text-white transition-colors" data-cursor="hover">Privacy Policy</a></li>
-            <li><a href="#" className="hover:text-white transition-colors" data-cursor="hover">Terms of Service</a></li>
-            <li><a href="#" className="hover:text-white transition-colors" data-cursor="hover">HIPAA Compliance</a></li>
-          </ul>
+            <div className="flex space-x-6 mt-4 md:mt-0">
+              <a href="#" className="text-slate-500 hover:text-accent transition-colors">
+                <span className="sr-only">Website</span>
+                <Globe className="h-5 w-5" />
+              </a>
+              <a href="#" className="text-slate-500 hover:text-accent transition-colors">
+                <span className="sr-only">Community</span>
+                <MessageCircle className="h-5 w-5" />
+              </a>
+              <a href="#" className="text-slate-500 hover:text-accent transition-colors">
+                <span className="sr-only">Contact</span>
+                <Mail className="h-5 w-5" />
+              </a>
+            </div>
         </div>
       </div>
 

@@ -38,8 +38,8 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2 }}
             className={cn(
-              'relative z-10 w-full max-w-lg rounded-2xl border border-slate-700/60',
-              'bg-slate-900 shadow-2xl p-6 overflow-y-auto max-h-[90vh]',
+              'relative w-full max-w-md transform rounded-2xl align-middle transition-all',
+              'bg-surface border border-primary/5 shadow-multi p-8 overflow-y-auto max-h-[90vh]',
               className,
             )}
           >

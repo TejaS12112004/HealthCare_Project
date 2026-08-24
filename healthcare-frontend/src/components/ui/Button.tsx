@@ -2,16 +2,16 @@ import { forwardRef } from 'react';
 import { cn } from '../../lib/utils';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  variant?: 'primary' | 'secondary' | 'outline' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
 }
 
 const variants = {
-  primary: 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20',
-  secondary: 'bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700',
-  ghost: 'hover:bg-slate-800 text-slate-300',
-  danger: 'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-500/20',
+  primary: 'bg-primary hover:bg-primary/90 text-white shadow-multi',
+  secondary: 'bg-surface hover:bg-surface-hover text-primary border border-primary/5',
+  outline: 'bg-transparent border border-primary/10 text-primary hover:bg-primary/5',
+  danger: 'bg-red-500 hover:bg-red-600 text-white shadow-multi',
 };
 const sizes = { sm: 'px-3 py-1.5 text-sm', md: 'px-4 py-2 text-sm', lg: 'px-6 py-3 text-base' };
 

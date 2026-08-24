@@ -11,9 +11,9 @@ export interface AsyncButtonProps extends HTMLMotionProps<"button"> {
 }
 
 const variants = {
-  primary: 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg shadow-indigo-500/20',
-  secondary: 'bg-slate-800 text-slate-100 hover:bg-slate-700 border border-slate-700',
-  danger: 'bg-red-600 text-white hover:bg-red-500 shadow-lg shadow-red-500/20',
+  primary: 'bg-primary text-white hover:bg-primary/90 shadow-multi',
+  secondary: 'bg-surface text-primary border border-primary/5 hover:bg-surface-hover',
+  danger: 'bg-red-500 text-white hover:bg-red-600 shadow-multi',
 };
 
 export const AsyncButton = forwardRef<HTMLButtonElement, AsyncButtonProps>(
