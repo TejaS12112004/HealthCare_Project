@@ -8,22 +8,19 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.UUID;
 
 /**
  * Doctor profile entity linked one-to-one with a {@link User} account.
- * Captures professional attributes such as licence number, specialisations,
- * consultation fee, and availability toggle.
+ * Aligned with V2 migration:
+ * <ul>
+ *   <li>UUID PK</li>
+ *   <li>Single {@link Specialisation} via many-to-one (not many-to-many)</li>
+ *   <li>{@code slot_duration_minutes} column</li>
+ * </ul>
  */
 @Entity
-@Table(
-    name = "doctors",
-    uniqueConstraints = {
-        @UniqueConstraint(name = "uk_doctors_user_id", columnNames = "user_id"),
-        @UniqueConstraint(name = "uk_doctors_licence", columnNames = "licence_number")
-    }
-)
+@Table(name = "doctors")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,15 +29,24 @@ import java.util.Set;
 public class Doctor {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false,
                 foreignKey = @ForeignKey(name = "fk_doctors_user"))
     private User user;
 
-    @Column(name = "licence_number", nullable = false, length = 50)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "specialisation_id",
+                foreignKey = @ForeignKey(name = "fk_doctors_specialisation"))
+    private Specialisation specialisation;
+
+    @Column(name = "bio", columnDefinition = "TEXT")
+    private String bio;
+
+    @Column(name = "licence_number", unique = true, length = 50)
     private String licenceNumber;
 
     @Column(name = "years_of_experience")
@@ -49,14 +55,12 @@ public class Doctor {
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
-    @Column(name = "bio", columnDefinition = "TEXT")
-    private String bio;
-
     @Column(name = "consultation_fee", precision = 10, scale = 2)
     private BigDecimal consultationFee;
 
     @Column(name = "average_rating", precision = 3, scale = 2)
-    private BigDecimal averageRating;
+    @Builder.Default
+    private BigDecimal averageRating = BigDecimal.ZERO;
 
     @Column(name = "total_reviews")
     @Builder.Default
@@ -66,16 +70,9 @@ public class Doctor {
     @Builder.Default
     private Boolean isAvailable = true;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "doctor_specialisations",
-        joinColumns = @JoinColumn(name = "doctor_id",
-                                  foreignKey = @ForeignKey(name = "fk_ds_doctor")),
-        inverseJoinColumns = @JoinColumn(name = "specialisation_id",
-                                         foreignKey = @ForeignKey(name = "fk_ds_specialisation"))
-    )
+    @Column(name = "slot_duration_minutes", nullable = false)
     @Builder.Default
-    private Set<Specialisation> specialisations = new HashSet<>();
+    private Integer slotDurationMinutes = 30;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

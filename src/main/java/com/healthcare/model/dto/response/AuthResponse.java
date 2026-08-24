@@ -5,25 +5,21 @@ import com.healthcare.model.enums.Role;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Response body for successful login / token refresh.
- * {@code refreshToken} is only included in the login response, not refresh.
- */
+import java.util.UUID;
+
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuthResponse {
 
     private String accessToken;
-
-    /** Included only at initial login; null on refresh responses. */
     private String refreshToken;
 
     @Builder.Default
     private String tokenType = "Bearer";
 
-    private Long   expiresIn;    // access token TTL in seconds
-    private Long   userId;
+    private Long   expiresIn;
+    private UUID   userId;
     private String email;
     private String fullName;
     private Role   role;

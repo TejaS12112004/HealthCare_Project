@@ -16,11 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Admin-only management endpoints.
- * All routes require the caller to hold the {@code ROLE_ADMIN} authority,
- * enforced via class-level {@link PreAuthorize}.
- */
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
@@ -30,14 +27,11 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    // ── Doctor management ─────────────────────────────────────────────────────
-
     @PostMapping("/doctors")
     @Operation(summary = "Create a new doctor account")
     public ResponseEntity<DoctorResponse> createDoctor(
             @Valid @RequestBody CreateDoctorRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(adminService.createDoctor(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(adminService.createDoctor(request));
     }
 
     @GetMapping("/doctors")
@@ -49,12 +43,10 @@ public class AdminController {
     }
 
     @GetMapping("/doctors/{id}")
-    @Operation(summary = "Get a doctor by ID")
-    public ResponseEntity<DoctorResponse> getDoctor(@PathVariable Long id) {
+    @Operation(summary = "Get a doctor by UUID")
+    public ResponseEntity<DoctorResponse> getDoctor(@PathVariable UUID id) {
         return ResponseEntity.ok(adminService.getDoctorById(id));
     }
-
-    // ── User management ───────────────────────────────────────────────────────
 
     @GetMapping("/users")
     @Operation(summary = "List all users (paginated)")
@@ -66,13 +58,13 @@ public class AdminController {
 
     @PatchMapping("/users/{id}/activate")
     @Operation(summary = "Activate a user account")
-    public ResponseEntity<UserResponse> activateUser(@PathVariable Long id) {
+    public ResponseEntity<UserResponse> activateUser(@PathVariable UUID id) {
         return ResponseEntity.ok(adminService.toggleUserStatus(id, true));
     }
 
     @PatchMapping("/users/{id}/deactivate")
     @Operation(summary = "Deactivate a user account")
-    public ResponseEntity<UserResponse> deactivateUser(@PathVariable Long id) {
+    public ResponseEntity<UserResponse> deactivateUser(@PathVariable UUID id) {
         return ResponseEntity.ok(adminService.toggleUserStatus(id, false));
     }
 }

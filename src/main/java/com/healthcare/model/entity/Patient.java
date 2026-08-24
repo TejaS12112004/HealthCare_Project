@@ -7,19 +7,14 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Patient profile entity linked one-to-one with a {@link User} account.
- * Stores demographic and clinical context such as blood group, allergies,
- * and emergency contact details.
+ * Aligned with V2 migration: UUID PK, {@code emergency_contact} single column.
  */
 @Entity
-@Table(
-    name = "patients",
-    uniqueConstraints = {
-        @UniqueConstraint(name = "uk_patients_user_id", columnNames = "user_id")
-    }
-)
+@Table(name = "patients")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,8 +23,9 @@ import java.time.LocalDateTime;
 public class Patient {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false,
@@ -54,11 +50,9 @@ public class Patient {
     @Column(name = "current_medications", columnDefinition = "TEXT")
     private String currentMedications;
 
-    @Column(name = "emergency_contact_name", length = 150)
-    private String emergencyContactName;
-
-    @Column(name = "emergency_contact_phone", length = 20)
-    private String emergencyContactPhone;
+    /** Single emergency contact phone — mapped to {@code emergency_contact} column. */
+    @Column(name = "emergency_contact", length = 20)
+    private String emergencyContact;
 
     @Column(name = "address", columnDefinition = "TEXT")
     private String address;

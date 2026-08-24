@@ -9,12 +9,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
-/**
- * Repository for {@link User} entity operations.
- */
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, UUID> {
 
     Optional<User> findByEmail(String email);
 
@@ -26,11 +24,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Modifying
     @Query("UPDATE User u SET u.refreshToken = :token WHERE u.id = :id")
-    void updateRefreshToken(@Param("id") Long id, @Param("token") String token);
+    void updateRefreshToken(@Param("id") UUID id, @Param("token") String token);
 
     @Modifying
     @Query("UPDATE User u SET u.isActive = :active WHERE u.id = :id")
-    void updateActiveStatus(@Param("id") Long id, @Param("active") Boolean active);
+    void updateActiveStatus(@Param("id") UUID id, @Param("active") Boolean active);
 
     long countByRole(Role role);
 

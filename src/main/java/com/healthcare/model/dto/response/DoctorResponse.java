@@ -6,17 +6,14 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.UUID;
 
-/**
- * Detailed doctor profile returned to clients.
- */
 @Data
 @Builder
 public class DoctorResponse {
 
-    private Long          id;
-    private Long          userId;
+    private UUID          id;
+    private UUID          userId;
     private String        firstName;
     private String        lastName;
     private String        email;
@@ -29,6 +26,7 @@ public class DoctorResponse {
     private BigDecimal    averageRating;
     private Integer       totalReviews;
     private Boolean       isAvailable;
-    private Set<String>   specialisations;   // names only for brevity
+    private Integer       slotDurationMinutes;
+    private String        specialisation;     // single name (ManyToOne)
     private LocalDateTime createdAt;
 }

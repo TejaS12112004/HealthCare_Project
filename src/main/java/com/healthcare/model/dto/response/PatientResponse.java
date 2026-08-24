@@ -5,16 +5,14 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
-/**
- * Detailed patient profile returned to clients.
- */
 @Data
 @Builder
 public class PatientResponse {
 
-    private Long          id;
-    private Long          userId;
+    private UUID          id;
+    private UUID          userId;
     private String        firstName;
     private String        lastName;
     private String        email;
@@ -25,8 +23,7 @@ public class PatientResponse {
     private String        allergies;
     private String        chronicConditions;
     private String        currentMedications;
-    private String        emergencyContactName;
-    private String        emergencyContactPhone;
+    private String        emergencyContact;   // single field aligned to V2 schema
     private String        address;
     private String        city;
     private String        state;

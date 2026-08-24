@@ -5,15 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
-/**
- * Lightweight user summary returned in list and search endpoints.
- */
 @Data
 @Builder
 public class UserResponse {
 
-    private Long          id;
+    private UUID          id;
     private String        firstName;
     private String        lastName;
     private String        email;

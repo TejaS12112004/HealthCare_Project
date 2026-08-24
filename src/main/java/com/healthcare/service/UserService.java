@@ -8,19 +8,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * General user-account service.
- * Provides operations accessible to any authenticated user for their own profile.
- */
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
 
-    /**
-     * Retrieves the profile of the authenticated user by their email (JWT subject).
-     */
     @Transactional(readOnly = true)
     public UserResponse getMyProfile(String email) {
         User user = userRepository.findByEmail(email)
@@ -28,17 +23,12 @@ public class UserService {
         return toUserResponse(user);
     }
 
-    /**
-     * Retrieves a user profile by ID (admin use or self-lookup).
-     */
     @Transactional(readOnly = true)
-    public UserResponse getUserById(Long id) {
+    public UserResponse getUserById(UUID id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
         return toUserResponse(user);
     }
-
-    // ── Mapping helper ────────────────────────────────────────────────────────
 
     private UserResponse toUserResponse(User u) {
         return UserResponse.builder()

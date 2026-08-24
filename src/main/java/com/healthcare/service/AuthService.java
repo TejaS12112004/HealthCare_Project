@@ -25,45 +25,29 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Service responsible for authentication flows:
- * <ul>
- *   <li>Patient self-registration</li>
- *   <li>Login (issue access + refresh tokens)</li>
- *   <li>Refresh token rotation</li>
- *   <li>Logout (revoke refresh token)</li>
- * </ul>
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserRepository      userRepository;
-    private final PatientRepository   patientRepository;
-    private final PasswordEncoder     passwordEncoder;
-    private final JwtUtil             jwtUtil;
+    private final UserRepository        userRepository;
+    private final PatientRepository     patientRepository;
+    private final PasswordEncoder       passwordEncoder;
+    private final JwtUtil               jwtUtil;
     private final AuthenticationManager authManager;
-    private final UserDetailsService  userDetailsService;
+    private final UserDetailsService    userDetailsService;
 
     @Value("${jwt.expiry-ms}")
     private long expiryMs;
 
-    // ── Registration ──────────────────────────────────────────────────────────
-
-    /**
-     * Registers a new patient account and creates the linked Patient profile.
-     */
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new AppException(HttpStatus.CONFLICT,
-                    "An account with this email already exists.");
+            throw new AppException(HttpStatus.CONFLICT, "An account with this email already exists.");
         }
         if (request.getPhoneNumber() != null
                 && userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
-            throw new AppException(HttpStatus.CONFLICT,
-                    "An account with this phone number already exists.");
+            throw new AppException(HttpStatus.CONFLICT, "An account with this phone number already exists.");
         }
 
         User user = User.builder()
@@ -76,7 +60,6 @@ public class AuthService {
                 .build();
         user = userRepository.save(user);
 
-        // Create blank patient profile
         Patient patient = Patient.builder().user(user).build();
         patientRepository.save(patient);
 
@@ -84,11 +67,6 @@ public class AuthService {
         return issueTokens(user, true);
     }
 
-    // ── Login ─────────────────────────────────────────────────────────────────
-
-    /**
-     * Authenticates credentials and issues access + refresh tokens.
-     */
     @Transactional
     public AuthResponse login(LoginRequest request) {
         try {
@@ -109,56 +87,40 @@ public class AuthService {
         return issueTokens(user, true);
     }
 
-    // ── Refresh ───────────────────────────────────────────────────────────────
-
-    /**
-     * Validates the supplied refresh token, rotates it, and issues a new access token.
-     */
     @Transactional
     public AuthResponse refresh(RefreshTokenRequest request) {
         User user = userRepository.findByRefreshToken(request.getRefreshToken())
                 .orElseThrow(() -> new AppException(HttpStatus.UNAUTHORIZED,
                         "Invalid or expired refresh token."));
 
-        UserDetails details = userDetailsService.loadUserByUsername(user.getEmail());
-
         if (jwtUtil.isTokenExpired(request.getRefreshToken())) {
             userRepository.updateRefreshToken(user.getId(), null);
             throw new AppException(HttpStatus.UNAUTHORIZED, "Refresh token has expired. Please log in again.");
         }
 
-        // Rotate: issue new access + refresh
         return issueTokens(user, false);
     }
 
-    // ── Logout ────────────────────────────────────────────────────────────────
-
-    /**
-     * Revokes the stored refresh token for the given user email.
-     */
     @Transactional
     public void logout(String email) {
-        userRepository.findByEmail(email).ifPresent(user ->
-                userRepository.updateRefreshToken(user.getId(), null));
+        userRepository.findByEmail(email)
+                .ifPresent(u -> userRepository.updateRefreshToken(u.getId(), null));
         log.info("User logged out: {}", email);
     }
 
-    // ── Private helpers ───────────────────────────────────────────────────────
+    // ── Private ───────────────────────────────────────────────────────────────
 
     private AuthResponse issueTokens(User user, boolean includeRefresh) {
         UserDetails details = userDetailsService.loadUserByUsername(user.getEmail());
-
         String accessToken  = jwtUtil.generateAccessToken(details);
         String refreshToken = jwtUtil.generateRefreshToken(details);
-
-        // Persist refresh token (rotation)
         userRepository.updateRefreshToken(user.getId(), refreshToken);
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(includeRefresh ? refreshToken : null)
                 .expiresIn(expiryMs / 1000)
-                .userId(user.getId())
+                .userId(user.getId())           // UUID
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .role(user.getRole())

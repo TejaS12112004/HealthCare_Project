@@ -7,26 +7,18 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
-/**
- * Repository for {@link Patient} entity operations.
- */
 @Repository
-public interface PatientRepository extends JpaRepository<Patient, Long> {
+public interface PatientRepository extends JpaRepository<Patient, UUID> {
 
-    Optional<Patient> findByUserId(Long userId);
+    Optional<Patient> findByUserId(UUID userId);
 
-    boolean existsByUserId(Long userId);
+    boolean existsByUserId(UUID userId);
 
-    /**
-     * Fetch patient along with their associated user (avoids N+1).
-     */
     @Query("SELECT p FROM Patient p JOIN FETCH p.user WHERE p.id = :id")
-    Optional<Patient> findByIdWithUser(@Param("id") Long id);
+    Optional<Patient> findByIdWithUser(@Param("id") UUID id);
 
-    /**
-     * Fetch patient by user email (useful for security checks).
-     */
     @Query("SELECT p FROM Patient p JOIN p.user u WHERE u.email = :email")
     Optional<Patient> findByUserEmail(@Param("email") String email);
 }

@@ -7,19 +7,15 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
- * Core user entity — base identity for all actors in the system.
- * Extended by {@link Doctor} and {@link Patient} via one-to-one relationships.
+ * Core user entity — base identity for all actors (PATIENT, DOCTOR, ADMIN).
+ * Aligned with V1 migration: UUID PK, {@code phone} column,
+ * Google Calendar token fields.
  */
 @Entity
-@Table(
-    name = "users",
-    uniqueConstraints = {
-        @UniqueConstraint(name = "uk_users_email", columnNames = "email"),
-        @UniqueConstraint(name = "uk_users_phone", columnNames = "phone_number")
-    }
-)
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,8 +24,9 @@ import java.time.LocalDateTime;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
 
     @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;
@@ -37,13 +34,14 @@ public class User {
     @Column(name = "last_name", nullable = false, length = 100)
     private String lastName;
 
-    @Column(name = "email", nullable = false, length = 255)
+    @Column(name = "email", nullable = false, unique = true, length = 255)
     private String email;
 
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Column(name = "phone_number", length = 20)
+    /** Mapped to the {@code phone} column (V1 schema). */
+    @Column(name = "phone", length = 20)
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
@@ -61,6 +59,14 @@ public class User {
     @Column(name = "refresh_token", columnDefinition = "TEXT")
     private String refreshToken;
 
+    /** Encrypted Google Calendar OAuth access token. */
+    @Column(name = "google_calendar_token", columnDefinition = "TEXT")
+    private String googleCalendarToken;
+
+    /** Encrypted Google Calendar OAuth refresh token. */
+    @Column(name = "google_calendar_refresh_token", columnDefinition = "TEXT")
+    private String googleCalendarRefreshToken;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -69,7 +75,6 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    /** Convenience method to get full display name. */
     public String getFullName() {
         return firstName + " " + lastName;
     }
