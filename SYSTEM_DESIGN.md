@@ -3,16 +3,14 @@
 This document outlines the core technical design decisions, focusing on concurrency, slot management, administrative actions, and fault tolerance within the Healthcare Appointment Manager.
 
 ## 1. Double-Booking Prevention
+Concurrency control prevents multiple patients from booking the exact same doctor simultaneously. We use a **two-layer defence mechanism**.
 
-Concurrency control is essential in any scheduling system to prevent multiple patients from booking the exact same doctor at the same time. This system implements a robust **two-layer defence mechanism**.
+### Layer 1: Application-Level Validation
+When a slot is confirmed or held, the backend calculates availability by factoring in existing appointments, active slot holds, and doctor leave days, immediately rejecting invalid requests.
 
-### Layer 1: Pessimistic Locking (`SELECT FOR UPDATE`)
-When a slot is confirmed or held, the application checks the slot's availability. While this logic executes, the backend can issue a `SELECT FOR UPDATE` on the underlying database rows. However, in our fully normalized slot model where slots are generated dynamically and booked into an `appointments` table, we rely primarily on the database's integrity.
-
-### Layer 2: Database Constraints (`UNIQUE` Constraint)
-The ultimate source of truth is the PostgreSQL database. The `appointments` table enforces a composite unique constraint: `UNIQUE(doctor_id, slot_time)`. 
-If two parallel requests for the same slot time bypass the initial application-level validation simultaneously (e.g., due to race conditions or network latency), they will both attempt an `INSERT` statement. 
-Only one `INSERT` will succeed. The second transaction will violate the unique constraint and throw a `ConstraintViolationException`. The Spring Boot backend uses an `@ExceptionHandler` to catch this specific exception, translating it into an HTTP 409 Conflict error ("Slot already booked"), ensuring data integrity is never compromised.
+### Layer 2: Database Integrity (`UNIQUE` Constraint)
+The PostgreSQL database is the ultimate source of truth. The `appointments` table enforces a composite unique constraint: `UNIQUE(doctor_id, slot_time)`. 
+If two parallel requests bypass the initial application-level validation simultaneously due to race conditions, they will both attempt an `INSERT`. Only one will succeed. The second transaction will violate the unique constraint and throw a `ConstraintViolationException`. The Spring Boot backend uses an `@ExceptionHandler` to catch this, returning an HTTP 409 Conflict error.
 
 ## 2. Slot Hold Mechanism
 
