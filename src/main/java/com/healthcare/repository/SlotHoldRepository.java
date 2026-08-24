@@ -40,4 +40,22 @@ public interface SlotHoldRepository extends JpaRepository<SlotHold, UUID> {
     void releaseHold(@Param("patientId") UUID patientId,
                      @Param("doctorId") UUID doctorId,
                      @Param("slotTime") LocalDateTime slotTime);
+
+    /**
+     * Returns all active (unreleased, unexpired) held slot times for a doctor
+     * within a date window. Used during slot-availability listing to batch-exclude held slots.
+     */
+    @Query("""
+           SELECT sh.slotTime FROM SlotHold sh
+           WHERE sh.doctor.id = :doctorId
+           AND sh.slotTime >= :from
+           AND sh.slotTime < :to
+           AND sh.isReleased = false
+           AND sh.expiresAt > :now
+           """)
+    List<LocalDateTime> findActiveHeldSlotTimes(
+            @Param("doctorId")  UUID doctorId,
+            @Param("from")      LocalDateTime from,
+            @Param("to")        LocalDateTime to,
+            @Param("now")       LocalDateTime now);
 }
