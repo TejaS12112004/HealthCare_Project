@@ -65,6 +65,6 @@ public class AppConfig {
                 .scheme("bearer")
                 .bearerFormat("JWT")
                 .in(SecurityScheme.In.HEADER)
-                .description("Provide the JWT access token obtained from POST /api/auth/login");
+                .description("Provide the JWT access token obtained from POST /api/v1/auth/login");
     }
 }

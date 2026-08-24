@@ -3,9 +3,9 @@ package com.healthcare.service;
 import com.healthcare.exception.AppException;
 import com.healthcare.exception.ResourceNotFoundException;
 import com.healthcare.model.dto.request.LoginRequest;
-import com.healthcare.model.dto.request.RefreshTokenRequest;
 import com.healthcare.model.dto.request.RegisterRequest;
 import com.healthcare.model.dto.response.AuthResponse;
+import com.healthcare.model.dto.response.UserSummaryResponse;
 import com.healthcare.model.entity.Patient;
 import com.healthcare.model.entity.User;
 import com.healthcare.model.enums.Role;
@@ -25,6 +25,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Handles all authentication flows:
+ * <ol>
+ *   <li>Patient self-registration (PATIENT role only)</li>
+ *   <li>Login — issue access + refresh tokens</li>
+ *   <li>Refresh — validate refresh token, rotate and re-issue</li>
+ *   <li>Logout — revoke stored refresh token</li>
+ * </ol>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -40,38 +49,60 @@ public class AuthService {
     @Value("${jwt.expiry-ms}")
     private long expiryMs;
 
+    // ── Register ──────────────────────────────────────────────────────────────
+
+    /**
+     * Registers a new PATIENT user and creates a blank patient profile.
+     * Doctors are created only by admins via the admin API.
+     */
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new AppException(HttpStatus.CONFLICT, "An account with this email already exists.");
-        }
-        if (request.getPhoneNumber() != null
-                && userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
-            throw new AppException(HttpStatus.CONFLICT, "An account with this phone number already exists.");
+        // Enforce PATIENT-only self-registration
+        if (request.getRole() != null && request.getRole() != Role.PATIENT) {
+            throw new AppException(HttpStatus.FORBIDDEN,
+                    "Self-registration is only allowed for PATIENT role. " +
+                    "Doctor accounts are created by an administrator.");
         }
 
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new AppException(HttpStatus.CONFLICT,
+                    "An account with this email already exists.");
+        }
+        if (request.getPhone() != null
+                && userRepository.existsByPhoneNumber(request.getPhone())) {
+            throw new AppException(HttpStatus.CONFLICT,
+                    "An account with this phone number already exists.");
+        }
+
+        // Save user with BCrypt-hashed password
         User user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .phoneNumber(request.getPhoneNumber())
+                .phoneNumber(request.getPhone())
                 .role(Role.PATIENT)
                 .build();
         user = userRepository.save(user);
 
-        Patient patient = Patient.builder().user(user).build();
-        patientRepository.save(patient);
+        // Create blank patient profile
+        patientRepository.save(Patient.builder().user(user).build());
 
         log.info("Registered new patient: {}", user.getEmail());
-        return issueTokens(user, true);
+        return buildAuthResponse(user, true);
     }
 
+    // ── Login ─────────────────────────────────────────────────────────────────
+
+    /**
+     * Validates email/password credentials and returns tokens + user summary.
+     */
     @Transactional
     public AuthResponse login(LoginRequest request) {
         try {
             authManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(), request.getPassword()));
         } catch (BadCredentialsException ex) {
             throw new AppException(HttpStatus.UNAUTHORIZED, "Invalid email or password.");
         }
@@ -80,27 +111,43 @@ public class AuthService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", request.getEmail()));
 
         if (!user.getIsActive()) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Your account has been deactivated.");
+            throw new AppException(HttpStatus.FORBIDDEN,
+                    "Your account has been deactivated. Please contact support.");
         }
 
         log.info("User logged in: {}", user.getEmail());
-        return issueTokens(user, true);
+        return buildAuthResponse(user, true);
     }
 
-    @Transactional
-    public AuthResponse refresh(RefreshTokenRequest request) {
-        User user = userRepository.findByRefreshToken(request.getRefreshToken())
-                .orElseThrow(() -> new AppException(HttpStatus.UNAUTHORIZED,
-                        "Invalid or expired refresh token."));
+    // ── Refresh ───────────────────────────────────────────────────────────────
 
-        if (jwtUtil.isTokenExpired(request.getRefreshToken())) {
-            userRepository.updateRefreshToken(user.getId(), null);
-            throw new AppException(HttpStatus.UNAUTHORIZED, "Refresh token has expired. Please log in again.");
+    /**
+     * Validates the supplied refresh token, rotates it, and returns a new access token.
+     * The new {@link AuthResponse} does NOT include a refreshToken field (client keeps
+     * the same refresh token until it expires or logout is called).
+     */
+    @Transactional
+    public AuthResponse refresh(String refreshToken) {
+        // 1. Structural validation
+        if (!jwtUtil.validateToken(refreshToken)) {
+            throw new AppException(HttpStatus.UNAUTHORIZED,
+                    "Refresh token is invalid or has expired. Please log in again.");
         }
 
-        return issueTokens(user, false);
+        // 2. Must be stored in DB (proves it hasn't been revoked)
+        User user = userRepository.findByRefreshToken(refreshToken)
+                .orElseThrow(() -> new AppException(HttpStatus.UNAUTHORIZED,
+                        "Refresh token not recognised. Please log in again."));
+
+        log.info("Issuing new access token for: {}", user.getEmail());
+        return buildAuthResponse(user, false);  // false = don't include refresh token in response
     }
 
+    // ── Logout ────────────────────────────────────────────────────────────────
+
+    /**
+     * Revokes the stored refresh token for the authenticated user.
+     */
     @Transactional
     public void logout(String email) {
         userRepository.findByEmail(email)
@@ -108,22 +155,30 @@ public class AuthService {
         log.info("User logged out: {}", email);
     }
 
-    // ── Private ───────────────────────────────────────────────────────────────
+    // ── Helper ────────────────────────────────────────────────────────────────
 
-    private AuthResponse issueTokens(User user, boolean includeRefresh) {
+    private AuthResponse buildAuthResponse(User user, boolean includeRefreshToken) {
         UserDetails details = userDetailsService.loadUserByUsername(user.getEmail());
+
         String accessToken  = jwtUtil.generateAccessToken(details);
         String refreshToken = jwtUtil.generateRefreshToken(details);
+
+        // Always rotate and persist the refresh token
         userRepository.updateRefreshToken(user.getId(), refreshToken);
+
+        UserSummaryResponse userSummary = UserSummaryResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .role(user.getRole())
+                .build();
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(includeRefresh ? refreshToken : null)
+                .refreshToken(includeRefreshToken ? refreshToken : null)
                 .expiresIn(expiryMs / 1000)
-                .userId(user.getId())           // UUID
-                .email(user.getEmail())
-                .fullName(user.getFullName())
-                .role(user.getRole())
+                .user(userSummary)
                 .build();
     }
 }

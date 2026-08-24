@@ -1,5 +1,6 @@
 package com.healthcare.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -10,14 +11,21 @@ import org.springframework.web.filter.CorsFilter;
 import java.util.List;
 
 /**
- * CORS configuration — allows the frontend (React/Angular/etc.) running on a
- * different origin to call the API in development.
+ * CORS configuration.
+ * Allows requests from:
+ * <ul>
+ *   <li>{@code http://localhost:5173} — Vite/React dev server</li>
+ *   <li>{@code http://localhost:3000} — alternate local dev port</li>
+ *   <li>{@code FRONTEND_URL} env var — deployed Vercel/production URL</li>
+ * </ul>
  *
- * <p><strong>Important:</strong> For production, restrict {@code allowedOrigins}
- * to your actual frontend domain(s) rather than using {@code *}.
+ * <p>For production, ensure {@code FRONTEND_URL} is set to your exact frontend origin.
  */
 @Configuration
 public class CorsConfig {
+
+    @Value("${app.frontend-url:http://localhost:5173}")
+    private String frontendUrl;
 
     @Bean
     public CorsFilter corsFilter() {
@@ -28,8 +36,11 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allow all origins in development; tighten for production
-        config.setAllowedOriginPatterns(List.of("*"));
+        config.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "http://localhost:3000",
+                frontendUrl
+        ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Authorization", "X-Refresh-Token"));

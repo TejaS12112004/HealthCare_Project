@@ -17,9 +17,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
- * Servlet filter that intercepts every request, extracts the Bearer JWT from
- * the {@code Authorization} header, validates it, and populates the
- * {@link SecurityContextHolder} so downstream filters see an authenticated principal.
+ * Intercepts every request, extracts the Bearer JWT, validates it, and populates
+ * the {@link SecurityContextHolder} so downstream security can see an authenticated principal.
+ *
+ * <p>On a missing or invalid token the filter simply continues the chain — the
+ * endpoint-level security (configured in {@link com.healthcare.config.SecurityConfig})
+ * is responsible for deciding whether to return 401.
  */
 @Slf4j
 @Component
@@ -29,8 +32,8 @@ public class JwtFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
     private static final String AUTH_HEADER   = "Authorization";
 
-    private final JwtUtil                  jwtUtil;
-    private final UserDetailsServiceImpl   userDetailsService;
+    private final JwtUtil                jwtUtil;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Override
     protected void doFilterInternal(
@@ -41,24 +44,25 @@ public class JwtFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader(AUTH_HEADER);
 
-        // Skip filter if no Bearer token is present
+        // ── 1. Skip if no Bearer token ────────────────────────────────────────
         if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        final String jwt   = authHeader.substring(BEARER_PREFIX.length());
-        final String email;
+        final String jwt = authHeader.substring(BEARER_PREFIX.length());
 
+        // ── 2. Extract email — skip on malformed tokens ───────────────────────
+        final String email;
         try {
-            email = jwtUtil.extractUsername(jwt);
+            email = jwtUtil.extractEmail(jwt);
         } catch (Exception ex) {
-            log.debug("Could not extract username from JWT: {}", ex.getMessage());
+            log.debug("Could not extract email from JWT: {}", ex.getMessage());
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Only authenticate if not already set in the context
+        // ── 3. Authenticate if not already in context ─────────────────────────
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
@@ -71,7 +75,9 @@ public class JwtFilter extends OncePerRequestFilter {
                         );
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-                log.debug("Authenticated user '{}' via JWT", email);
+                log.debug("Authenticated '{}' via JWT", email);
+            } else {
+                log.debug("JWT failed validation for '{}'", email);
             }
         }
 

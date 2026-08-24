@@ -14,8 +14,8 @@ import java.util.List;
 
 /**
  * Spring Security {@link UserDetailsService} implementation.
- * Loads a {@link User} by email and wraps it in a Spring Security
- * {@link UserDetails} object with a {@code ROLE_} prefixed authority.
+ * Loads a {@link User} by email from {@link UserRepository} and wraps it
+ * in a Spring Security {@link UserDetails} with a {@code "ROLE_"}-prefixed authority.
  */
 @Service
 @RequiredArgsConstructor
@@ -33,8 +33,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())
                 .password(user.getPasswordHash())
+                // GrantedAuthority = "ROLE_" + role name  (e.g. ROLE_PATIENT)
                 .authorities(List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())))
-                .accountLocked(!user.getIsActive())
+                .accountLocked(!user.getIsActive())   // inactive users are locked
                 .build();
     }
 }
