@@ -44,6 +44,10 @@ public class MedicationReminder {
     @Builder.Default
     private Boolean isActive = true;
 
+    /** UTC timestamp of the last successful email send. Used for 23-hour deduplication guard. */
+    @Column(name = "last_sent_at")
+    private java.time.Instant lastSentAt;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
