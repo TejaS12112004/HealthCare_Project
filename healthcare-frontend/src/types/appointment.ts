@@ -59,6 +59,7 @@ export interface Doctor {
   isActive: boolean;
   availableSlots?: string[];
   nextAvailableDate?: string;
+  workingHours?: any[];
 }
 
 export interface PatientSummary {

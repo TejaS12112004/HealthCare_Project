@@ -28,10 +28,9 @@ const PostVisitNotes = lazy(() => import('../features/doctor/PostVisitNotes'));
 
 // Admin
 const AdminDoctors = lazy(() => import('../features/admin/AdminDoctors'));
-const AdminDoctorForm = lazy(() => import('../features/admin/AdminDoctorForm'));
-const AdminDoctorDetail = lazy(() => import('../features/admin/AdminDoctorDetail'));
 const AdminLeave = lazy(() => import('../features/admin/AdminLeave'));
 const AdminNotifications = lazy(() => import('../features/admin/AdminNotifications'));
+const AdminLLMMonitor = lazy(() => import('../features/admin/AdminLLMMonitor'));
 
 // Misc
 const UnauthorizedPage = lazy(() => import('../features/auth/UnauthorizedPage'));
@@ -75,11 +74,11 @@ export const AppRouter: React.FC = () => (
       {/* ── Admin ─────────────────────────────────────── */}
       <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
         <Route element={<AdminLayout />}>
+          <Route path="/admin/dashboard" element={<Navigate to="/admin/doctors" replace />} />
           <Route path="/admin/doctors" element={<AdminDoctors />} />
-          <Route path="/admin/doctors/new" element={<AdminDoctorForm />} />
-          <Route path="/admin/doctors/:id" element={<AdminDoctorDetail />} />
           <Route path="/admin/leave" element={<AdminLeave />} />
           <Route path="/admin/notifications" element={<AdminNotifications />} />
+          <Route path="/admin/llm-monitor" element={<AdminLLMMonitor />} />
         </Route>
       </Route>
 
