@@ -1,11 +1,14 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import apiClient from '../../api/apiClient';
 import { ENDPOINTS } from '../../api/endpoints';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
+import { FloatingInput } from '../../components/ui/FloatingInput';
+import { MorphingButton } from '../../components/ui/MorphingButton';
+import { Reveal } from '../../lib/motion/Reveal';
 import type { Role } from '../../types/auth';
 
 const schema = z.object({
@@ -19,72 +22,138 @@ type FormData = z.infer<typeof schema>;
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
+  const [step, setStep] = useState(1);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    trigger,
+    formState: { errors },
     setError,
+    watch,
   } = useForm<FormData>({ resolver: zodResolver(schema), defaultValues: { role: 'PATIENT' } });
 
+  const roleValue = watch('role');
+
   const onSubmit = async (data: FormData) => {
+    setIsPending(true);
     try {
       await apiClient.post(ENDPOINTS.AUTH.REGISTER, data);
-      navigate('/login', { state: { registered: true } });
+      setIsSuccess(true);
+      setTimeout(() => {
+        navigate('/login', { state: { registered: true } });
+      }, 1000);
     } catch {
       setError('root', { message: 'Registration failed. Email may already be in use.' });
+      setIsPending(false);
     }
   };
 
+  const nextStep = async () => {
+    const isStep1Valid = await trigger(['firstName', 'lastName', 'email']);
+    if (isStep1Valid) setStep(2);
+  };
+
   return (
-    <div className="w-full max-w-md">
-      <div className="rounded-2xl border border-slate-700/50 bg-slate-900/80 backdrop-blur-xl p-8 shadow-2xl">
-        <div className="text-center mb-8">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 shadow-lg shadow-indigo-500/30 mb-4">
-            <span className="text-2xl font-bold text-white">HC</span>
-          </div>
-          <h1 className="text-2xl font-bold text-white">Create account</h1>
-          <p className="mt-1 text-sm text-slate-400">Join the HealthCare platform</p>
-        </div>
+    <div className="w-full">
+      <Reveal delay={0.1}>
+        <h1 className="text-3xl font-display font-bold text-primary mb-2">Create account</h1>
+        <p className="text-slate-500 mb-8">Join the HealthCare platform</p>
+      </Reveal>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <Input label="First name" placeholder="John" error={errors.firstName?.message} {...register('firstName')} />
-            <Input label="Last name" placeholder="Doe" error={errors.lastName?.message} {...register('lastName')} />
-          </div>
-          <Input label="Email" type="email" placeholder="you@example.com" error={errors.email?.message} {...register('email')} />
-          <Input label="Password" type="password" placeholder="••••••••" error={errors.password?.message} {...register('password')} />
+      {/* Progress Bar */}
+      <div className="w-full h-1 bg-slate-100 rounded-full mb-8 overflow-hidden">
+        <motion.div 
+          className="h-full bg-accent"
+          initial={{ width: "50%" }}
+          animate={{ width: step === 1 ? "50%" : "100%" }}
+          transition={{ duration: 0.4 }}
+        />
+      </div>
 
-          {/* Role toggle */}
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-slate-300">I am a</label>
-            <div className="grid grid-cols-2 gap-2">
-              {(['PATIENT', 'DOCTOR'] as Role[]).map((r) => (
-                <label key={r} className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" value={r} {...register('role')} className="accent-indigo-500" />
-                  <span className="text-sm text-slate-300">{r === 'PATIENT' ? 'Patient' : 'Doctor'}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <AnimatePresence mode="wait">
+          {step === 1 ? (
+            <motion.div
+              key="step1"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-2 gap-3">
+                <FloatingInput label="First name" error={errors.firstName?.message} {...register('firstName')} />
+                <FloatingInput label="Last name" error={errors.lastName?.message} {...register('lastName')} />
+              </div>
+              <FloatingInput label="Email address" type="email" error={errors.email?.message} {...register('email')} />
+              
+              <div className="pt-4">
+                <button
+                  type="button"
+                  onClick={nextStep}
+                  className="w-full h-14 bg-primary text-white font-medium rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
+                >
+                  Continue
+                </button>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="step2"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-4"
+            >
+              <FloatingInput label="Password" type="password" error={errors.password?.message} {...register('password')} />
 
-          {errors.root && (
-            <p className="text-sm text-red-400 bg-red-950/50 border border-red-900 rounded-lg px-3 py-2">
-              {errors.root.message}
-            </p>
+              <div className="flex flex-col gap-2 mt-4 mb-2">
+                <label className="text-sm font-medium text-slate-500">I am a</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {(['PATIENT', 'DOCTOR'] as Role[]).map((r) => (
+                    <label key={r} className={`flex items-center justify-center h-12 rounded-xl border cursor-pointer transition-all ${roleValue === r ? 'border-accent bg-accent/5 text-accent font-medium' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}>
+                      <input type="radio" value={r} {...register('role')} className="hidden" />
+                      {r === 'PATIENT' ? 'Patient' : 'Doctor'}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {errors.root && (
+                <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4">
+                  {errors.root.message}
+                </p>
+              )}
+
+              <div className="pt-4 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="h-14 px-6 text-slate-500 font-medium hover:text-slate-800 transition-colors"
+                >
+                  Back
+                </button>
+                <MorphingButton type="submit" isLoading={isPending && !isSuccess} isSuccess={isSuccess}>
+                  Create account
+                </MorphingButton>
+              </div>
+            </motion.div>
           )}
+        </AnimatePresence>
+      </form>
 
-          <Button type="submit" isLoading={isSubmitting} className="w-full mt-2">
-            Create account
-          </Button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-slate-400">
+      <Reveal delay={0.5}>
+        <p className="mt-8 text-sm text-slate-500">
           Already have an account?{' '}
-          <Link to="/login" className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors">
+          <Link to="/login" className="font-medium text-primary hover:text-accent transition-colors">
             Sign in
           </Link>
         </p>
-      </div>
+      </Reveal>
     </div>
   );
 };

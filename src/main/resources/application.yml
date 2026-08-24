@@ -29,15 +29,17 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-        default_schema: public
+        default_schema: healthcare_dev
     open-in-view: false
 
   # ===== FLYWAY =====
   flyway:
     enabled: true
     baseline-on-migrate: true
+    clean-disabled: false
+    clean-on-validation-error: true
     locations: classpath:db/migration
-    schemas: public
+    schemas: healthcare_dev
 
   # ===== MAIL (Gmail SMTP) =====
   mail:

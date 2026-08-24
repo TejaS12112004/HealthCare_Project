@@ -32,9 +32,17 @@ export const AppointmentCard: React.FC<Props> = ({ appointment, onCancel }) => {
         </div>
         <div className="flex items-center gap-3 text-slate-300">
           <User className="h-4 w-4 text-indigo-400" />
-          <span className="text-sm font-medium">Dr. {appointment.doctor.firstName} {appointment.doctor.lastName}</span>
+          <span className="text-sm font-medium">
+            Dr. {appointment.doctor 
+              ? (appointment.doctor.firstName ? `${appointment.doctor.firstName} ${appointment.doctor.lastName}` : (appointment.doctor as any).name)
+              : (appointment as any).doctorName || 'Doctor'}
+          </span>
         </div>
-        <div className="pl-7 text-xs text-slate-500">{appointment.doctor.specialisation}</div>
+        {(appointment.doctor?.specialisation || (appointment as any).specialisation) && (
+          <div className="pl-7 text-xs text-slate-500">
+            {appointment.doctor?.specialisation || (appointment as any).specialisation}
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-3 mt-4 pt-4 border-t border-slate-800">

@@ -1,4 +1,5 @@
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Calendar,
   Home,
@@ -17,6 +18,7 @@ const navItems = [
 
 export const PatientLayout: React.FC = () => {
   const { user, logout } = useAuth();
+  const location = useLocation();
 
   return (
     <div className="min-h-screen bg-slate-950 flex">
@@ -26,9 +28,9 @@ export const PatientLayout: React.FC = () => {
         <div className="px-6 py-5 border-b border-slate-800">
           <Link to="/patient/dashboard" className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">HC</span>
+              <span className="text-white font-bold text-sm">WP</span>
             </div>
-            <span className="font-semibold text-white">HealthCare</span>
+            <span className="font-semibold text-white">WellPoint</span>
           </Link>
         </div>
 
@@ -77,8 +79,19 @@ export const PatientLayout: React.FC = () => {
       </aside>
 
       {/* Content */}
-      <main className="flex-1 overflow-auto">
-        <Outlet />
+      <main className="flex-1 overflow-auto bg-slate-950 relative">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.15 }}
+            className="h-full"
+          >
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
       </main>
     </div>
   );

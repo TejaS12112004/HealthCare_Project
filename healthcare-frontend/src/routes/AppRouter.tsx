@@ -5,11 +5,14 @@ import { Spinner } from '../components/ui/Spinner';
 
 // ── Layouts ───────────────────────────────────────────────────────────────
 import { PublicLayout } from '../layouts/PublicLayout';
+import { AuthLayout } from '../layouts/AuthLayout';
 import { PatientLayout } from '../layouts/PatientLayout';
 import { DoctorLayout } from '../layouts/DoctorLayout';
 import { AdminLayout } from '../layouts/AdminLayout';
 
 // ── Lazy-loaded pages ─────────────────────────────────────────────────────
+const LandingPage = lazy(() => import('../features/marketing/LandingPage'));
+
 // Auth
 const LoginPage = lazy(() => import('../features/auth/LoginPage'));
 const RegisterPage = lazy(() => import('../features/auth/RegisterPage'));
@@ -46,10 +49,16 @@ export const AppRouter: React.FC = () => (
     <Routes>
       {/* ── Public ────────────────────────────────────── */}
       <Route element={<PublicLayout />}>
+        <Route path="/" element={<LandingPage />} />
+      </Route>
+
+      {/* ── Auth ─────────────────────────────────────── */}
+      <Route element={<AuthLayout />}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/unauthorized" element={<UnauthorizedPage />} />
       </Route>
+
+      <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
       {/* ── Patient ───────────────────────────────────── */}
       <Route element={<ProtectedRoute allowedRoles={['PATIENT']} />}>

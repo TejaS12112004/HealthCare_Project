@@ -1,11 +1,12 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link } from 'react-router-dom';
-import { Lock } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
+import { FloatingInput } from '../../components/ui/FloatingInput';
+import { MorphingButton } from '../../components/ui/MorphingButton';
+import { Reveal } from '../../lib/motion/Reveal';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -14,7 +15,10 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const LoginPage: React.FC = () => {
-  const { login, isLoading } = useAuth();
+  const { login } = useAuth();
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+  
   const {
     register,
     handleSubmit,
@@ -23,61 +27,67 @@ const LoginPage: React.FC = () => {
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (data: FormData) => {
+    setIsPending(true);
     try {
       await login(data.email, data.password);
+      setIsSuccess(true);
+      // Wait for the button morph animation to complete before redirect happens (simulated here)
     } catch {
       setError('root', { message: 'Invalid email or password' });
+      setIsPending(false);
     }
   };
 
   return (
-    <div className="w-full max-w-md">
-      {/* Card */}
-      <div className="rounded-2xl border border-slate-700/50 bg-slate-900/80 backdrop-blur-xl p-8 shadow-2xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 shadow-lg shadow-indigo-500/30 mb-4">
-            <span className="text-2xl font-bold text-white">HC</span>
-          </div>
-          <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-          <p className="mt-1 text-sm text-slate-400">Sign in to your healthcare account</p>
-        </div>
+    <div className="w-full">
+      <Reveal delay={0.1}>
+        <h1 className="text-3xl font-display font-bold text-primary mb-2">Welcome back</h1>
+        <p className="text-slate-500 mb-8">Sign in to your healthcare account</p>
+      </Reveal>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <Input
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <Reveal delay={0.2}>
+          <FloatingInput
             label="Email address"
             type="email"
-            placeholder="you@example.com"
             error={errors.email?.message}
             {...register('email')}
           />
-          <Input
+        </Reveal>
+        <Reveal delay={0.3}>
+          <FloatingInput
             label="Password"
             type="password"
-            placeholder="••••••••"
             error={errors.password?.message}
             {...register('password')}
           />
+        </Reveal>
 
-          {errors.root && (
-            <p className="text-sm text-red-400 bg-red-950/50 border border-red-900 rounded-lg px-3 py-2">
+        {errors.root && (
+          <Reveal delay={0.1}>
+            <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4">
               {errors.root.message}
             </p>
-          )}
+          </Reveal>
+        )}
 
-          <Button type="submit" isLoading={isLoading} className="w-full mt-2">
-            <Lock className="h-4 w-4" />
-            Sign in
-          </Button>
-        </form>
+        <Reveal delay={0.4}>
+          <div className="mt-6">
+            <MorphingButton type="submit" isLoading={isPending && !isSuccess} isSuccess={isSuccess}>
+              Sign in
+            </MorphingButton>
+          </div>
+        </Reveal>
+      </form>
 
-        <p className="mt-6 text-center text-sm text-slate-400">
+      <Reveal delay={0.5}>
+        <p className="mt-8 text-sm text-slate-500">
           Don't have an account?{' '}
-          <Link to="/register" className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors">
+          <Link to="/register" className="font-medium text-primary hover:text-accent transition-colors">
             Create account
           </Link>
         </p>
-      </div>
+      </Reveal>
     </div>
   );
 };

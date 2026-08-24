@@ -1,6 +1,7 @@
 package com.healthcare.controller;
 
 import com.healthcare.exception.AppException;
+import com.healthcare.model.dto.request.ChangePasswordRequest;
 import com.healthcare.model.dto.request.LoginRequest;
 import com.healthcare.model.dto.request.RegisterRequest;
 import com.healthcare.model.dto.response.AuthResponse;
@@ -96,6 +97,26 @@ public class AuthController {
                 .lastName(user.getLastName())
                 .role(user.getRole())
                 .build());
+    }
+
+    // ── POST /api/v1/auth/change-password ─────────────────────────────────────
+
+    @PostMapping("/change-password")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @Operation(summary = "Change password for the authenticated user")
+    public ResponseEntity<Void> changePassword(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody ChangePasswordRequest request) {
+
+        if (userDetails == null) {
+            throw new AppException(HttpStatus.UNAUTHORIZED, "Not authenticated.");
+        }
+
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found."));
+
+        authService.changePassword(user.getId(), request);
+        return ResponseEntity.noContent().build();
     }
 
     // ── POST /api/v1/auth/logout ──────────────────────────────────────────────

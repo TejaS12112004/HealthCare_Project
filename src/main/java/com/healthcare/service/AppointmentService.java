@@ -230,23 +230,23 @@ public class AppointmentService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<AppointmentSummaryResponse> getMyAppointments(UUID patientUserId, int page, int size) {
+    public PageResponse<AppointmentResponse> getMyAppointments(UUID patientUserId, int page, int size) {
         Patient patient = patientRepository.findByUserId(patientUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient", "userId", patientUserId));
         
         Pageable pageable = PageRequest.of(page, size, Sort.by("slotTime").descending());
         Page<Appointment> apps = appointmentRepository.findByPatientId(patient.getId(), pageable);
-        return toPageResponse(apps);
+        return toFullPageResponse(apps);
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<AppointmentSummaryResponse> getDoctorAppointments(UUID doctorUserId, int page, int size) {
+    public PageResponse<AppointmentResponse> getDoctorAppointments(UUID doctorUserId, int page, int size) {
         Doctor doctor = doctorRepository.findByUserId(doctorUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor", "userId", doctorUserId));
         
         Pageable pageable = PageRequest.of(page, size, Sort.by("slotTime").descending());
         Page<Appointment> apps = appointmentRepository.findByDoctorId(doctor.getId(), pageable);
-        return toPageResponse(apps);
+        return toFullPageResponse(apps);
     }
 
     @Transactional(readOnly = true)
@@ -300,18 +300,16 @@ public class AppointmentService {
                 .build();
     }
 
-    private PageResponse<AppointmentSummaryResponse> toPageResponse(Page<Appointment> page) {
-        List<AppointmentSummaryResponse> content = page.getContent().stream()
-                .map(a -> AppointmentSummaryResponse.builder()
-                        .id(a.getId())
-                        .doctorName(a.getDoctor().getUser().getFullName())
-                        .patientName(a.getPatient().getUser().getFullName())
-                        .slotTime(a.getSlotTime())
-                        .status(a.getStatus())
-                        .build())
+    private PageResponse<AppointmentResponse> toFullPageResponse(Page<Appointment> page) {
+        List<AppointmentResponse> content = page.getContent().stream()
+                .map(a -> {
+                    SymptomForm form = symptomFormRepository.findByAppointmentId(a.getId()).orElse(null);
+                    PreVisitSummary pvs = preVisitSummaryRepository.findByAppointmentId(a.getId()).orElse(null);
+                    return toAppointmentResponse(a, form, pvs);
+                })
                 .toList();
                 
-        return PageResponse.<AppointmentSummaryResponse>builder()
+        return PageResponse.<AppointmentResponse>builder()
                 .content(content)
                 .pageNumber(page.getNumber())
                 .pageSize(page.getSize())

@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useCancelAppointment, usePatientAppointments } from './hooks/usePatientAPI';
 import { AppointmentCard } from './components/AppointmentCard';
 import { Button } from '../../components/ui/Button';
+import { AsyncButton } from '../../components/ui/AsyncButton';
 import { Modal } from '../../components/ui/Modal';
-import { Spinner } from '../../components/ui/Spinner';
+import { Skeleton } from '../../components/ui/Skeleton';
+import { Reveal, RevealItem } from '../../lib/motion/Reveal';
 import type { Appointment } from '../../types/appointment';
 import { cn } from '../../lib/utils';
 import type { AppointmentStatus } from '../../types/appointment';
@@ -58,17 +60,22 @@ const PatientAppointments: React.FC = () => {
 
       {/* Content */}
       {isLoading ? (
-        <div className="flex justify-center p-12"><Spinner size="lg" /></div>
-      ) : appointments?.length ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {appointments.map((apt: Appointment) => (
-            <AppointmentCard
-              key={apt.id}
-              appointment={apt}
-              onCancel={apt.status === 'CONFIRMED' ? setCancelId : undefined}
-            />
-          ))}
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
         </div>
+      ) : appointments?.length ? (
+        <Reveal stagger={0.04} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {appointments.map((apt: Appointment) => (
+            <RevealItem key={apt.id}>
+              <AppointmentCard
+                appointment={apt}
+                onCancel={apt.status === 'CONFIRMED' ? setCancelId : undefined}
+              />
+            </RevealItem>
+          ))}
+        </Reveal>
       ) : (
         <div className="text-center p-12 bg-slate-900 border border-slate-800 rounded-xl">
           <p className="text-slate-400">No {activeTab.toLowerCase()} appointments found.</p>
@@ -82,7 +89,9 @@ const PatientAppointments: React.FC = () => {
         </p>
         <div className="flex justify-end gap-3">
           <Button variant="ghost" onClick={() => setCancelId(null)}>Keep Appointment</Button>
-          <Button variant="danger" isLoading={isCancelling} onClick={handleCancel}>Confirm Cancellation</Button>
+          <div className="w-48">
+            <AsyncButton variant="danger" isLoading={isCancelling} onClick={handleCancel}>Confirm Cancellation</AsyncButton>
+          </div>
         </div>
       </Modal>
     </div>

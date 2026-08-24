@@ -78,8 +78,10 @@ const DoctorAppointments: React.FC = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
                       <h3 className="font-semibold text-slate-200">
-                        {apt.patient.firstName} {apt.patient.lastName}
-                      </h3>
+                      {apt.patient 
+                        ? (apt.patient as any).name || `${apt.patient.firstName} ${apt.patient.lastName}`
+                        : (apt as any).patientName || 'Unknown Patient'}
+                    </h3>
                       {apt.status === 'CANCELLED' && (
                         <Badge variant="danger">Cancelled</Badge>
                       )}

@@ -137,7 +137,7 @@ export const AdminLeave: React.FC = () => {
                     key={dateStr}
                     onClick={() => isCurrentMonth && handleDateClick(day)}
                     className={cn(
-                      "border-b border-r border-slate-800/50 p-2 relative transition-colors",
+                      "border-b border-r border-slate-800/50 p-2 relative transition-colors duration-200",
                       !isCurrentMonth ? "bg-slate-950 opacity-20 cursor-default" : "bg-slate-950 hover:bg-slate-800/30 cursor-pointer",
                       i % 7 === 6 && "border-r-0",
                       isLeave && "bg-red-500/10 hover:bg-red-500/20"

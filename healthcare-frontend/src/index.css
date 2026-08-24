@@ -1,17 +1,58 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary: #0B1220;
+  --color-background: #F7F8FA;
+  --color-accent: #12B7A5;
+
+  --color-urgency-low: #10B981;
+  --color-urgency-medium: #F59E0B;
+  --color-urgency-high: #EF4444;
+
+  --color-surface: #FFFFFF;
+  --color-surface-hover: #F1F5F9;
+
+  --font-sans: "Inter", sans-serif;
+  --font-display: "Inter Tight", sans-serif;
+
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+
+  --shadow-multi: 0 4px 6px -1px rgb(11 18 32 / 0.03), 0 10px 15px -3px rgb(11 18 32 / 0.03), 0 20px 25px -5px rgb(11 18 32 / 0.03);
+}
+
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-  }
-
   body {
-    @apply bg-slate-950 text-slate-100 antialiased;
+    @apply bg-background text-primary antialiased font-sans;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-surface/70 backdrop-blur-md border border-primary/5;
+  }
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
+  .animate-pulse-slow {
+    animation: pulse-slow 1.8s ease-in-out infinite;
+  }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
 }

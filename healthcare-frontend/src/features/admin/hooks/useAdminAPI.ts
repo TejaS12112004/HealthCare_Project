@@ -10,7 +10,7 @@ export const useAdminDoctors = () => {
   return useQuery({
     queryKey: ['admin', 'doctors'],
     queryFn: async () => {
-      const { data } = await apiClient.get<{ content: Doctor[] }>(ENDPOINTS.DOCTORS.LIST);
+      const { data } = await apiClient.get<{ content: Doctor[] }>(ENDPOINTS.ADMIN.DOCTORS);
       return data.content;
     },
   });
@@ -57,6 +57,18 @@ export const useDeactivateDoctor = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       await apiClient.delete(`/api/v1/admin/doctors/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'doctors'] });
+    },
+  });
+};
+
+export const useActivateDoctor = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await apiClient.patch(`/api/v1/admin/users/${id}/activate`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'doctors'] });

@@ -84,7 +84,7 @@ public class AppointmentController {
     @GetMapping("/my")
     @PreAuthorize("hasRole('PATIENT')")
     @Operation(summary = "Get current patient's appointments")
-    public ResponseEntity<PageResponse<AppointmentSummaryResponse>> getMyAppointments(
+    public ResponseEntity<PageResponse<AppointmentResponse>> getMyAppointments(
             Authentication authentication,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -95,7 +95,7 @@ public class AppointmentController {
     @GetMapping("/doctor")
     @PreAuthorize("hasRole('DOCTOR')")
     @Operation(summary = "Get current doctor's appointments")
-    public ResponseEntity<PageResponse<AppointmentSummaryResponse>> getDoctorAppointments(
+    public ResponseEntity<PageResponse<AppointmentResponse>> getDoctorAppointments(
             Authentication authentication,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {

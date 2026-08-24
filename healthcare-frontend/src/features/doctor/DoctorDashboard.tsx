@@ -5,6 +5,8 @@ import { useAuth } from '../../hooks/useAuth';
 import { useDoctorAppointments } from './hooks/useDoctorAPI';
 import { Badge } from '../../components/ui/Badge';
 import { Spinner } from '../../components/ui/Spinner';
+import { Skeleton } from '../../components/ui/Skeleton';
+import { Reveal, RevealItem } from '../../lib/motion/Reveal';
 import { cn } from '../../lib/utils';
 import type { Appointment } from '../../types/appointment';
 
@@ -29,7 +31,7 @@ const UrgencyBadge: React.FC<{ appointment: Appointment }> = ({ appointment }) =
   const urgency = appointment.preVisitSummary.urgencyLevel;
   switch (urgency) {
     case 'HIGH':
-      return <Badge variant="danger">High Urgency</Badge>;
+      return <div className="animate-pulse-slow"><Badge variant="danger">High Urgency</Badge></div>;
     case 'MEDIUM':
       return <Badge variant="warning">Medium Urgency</Badge>;
     default:
@@ -96,49 +98,56 @@ const DoctorDashboard: React.FC = () => {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center p-12"><Spinner size="lg" /></div>
-        ) : appointments && appointments.length > 0 ? (
-          <div className="divide-y divide-slate-800">
-            {appointments.map((apt) => (
-              <Link 
-                key={apt.id} 
-                to={`/doctor/appointments/${apt.id}`}
-                className={cn(
-                  "flex items-center justify-between p-6 hover:bg-slate-800/50 transition-colors group",
-                  apt.status === 'COMPLETED' && "opacity-70"
-                )}
-              >
-                <div className="flex items-center gap-6 flex-1">
-                  <div className="flex flex-col text-slate-300 w-24">
-                    <span className="font-semibold text-white">{format(parseISO(apt.slotTime), 'h:mm a')}</span>
-                    <span className="text-xs text-slate-500">30 min</span>
-                  </div>
-                  
-                  <div className="h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors">
-                    <User className="h-5 w-5 text-slate-400 group-hover:text-indigo-400" />
-                  </div>
-
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-slate-200">
-                      {apt.patient.firstName} {apt.patient.lastName}
-                    </h3>
-                    {apt.symptomForm?.symptoms && (
-                      <p className="text-sm text-slate-400 truncate max-w-md">
-                        {apt.symptomForm.symptoms}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-6">
-                  <div className="hidden md:block">
-                    <UrgencyBadge appointment={apt} />
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-slate-600 group-hover:text-indigo-400 transition-colors" />
-                </div>
-              </Link>
-            ))}
+          <div className="flex flex-col gap-4 p-6">
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
           </div>
+        ) : appointments && appointments.length > 0 ? (
+          <Reveal stagger={0.04} className="divide-y divide-slate-800">
+            {appointments.map((apt) => (
+              <RevealItem key={apt.id}>
+                <Link 
+                  to={`/doctor/appointments/${apt.id}`}
+                  className={cn(
+                    "flex items-center justify-between p-6 hover:bg-slate-800/50 hover:-translate-y-[2px] hover:shadow-lg transition-all duration-200 group",
+                    apt.status === 'COMPLETED' && "opacity-70"
+                  )}
+                >
+                  <div className="flex items-center gap-6 flex-1">
+                    <div className="flex flex-col text-slate-300 w-24">
+                      <span className="font-semibold text-white">{format(parseISO(apt.slotTime), 'h:mm a')}</span>
+                      <span className="text-xs text-slate-500">30 min</span>
+                    </div>
+                    
+                    <div className="h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors">
+                      <User className="h-5 w-5 text-slate-400 group-hover:text-indigo-400" />
+                    </div>
+
+                    <div className="flex-1">
+                      <div className="font-medium text-slate-200">
+                      {apt.patient 
+                        ? (apt.patient as any).name || `${apt.patient.firstName} ${apt.patient.lastName}`
+                        : (apt as any).patientName || 'Unknown Patient'}
+                    </div>
+                      {apt.symptomForm?.symptoms && (
+                        <p className="text-sm text-slate-400 truncate max-w-md">
+                          {apt.symptomForm.symptoms}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-6">
+                    <div className="hidden md:block">
+                      <UrgencyBadge appointment={apt} />
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-slate-600 group-hover:text-indigo-400 transition-colors" />
+                  </div>
+                </Link>
+              </RevealItem>
+            ))}
+          </Reveal>
         ) : (
           <div className="p-12 text-center text-slate-400">
             <Calendar className="h-12 w-12 text-slate-700 mx-auto mb-4" />

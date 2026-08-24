@@ -35,6 +35,7 @@ CREATE TABLE doctors (
     bio                   TEXT,
     licence_number        VARCHAR(50) UNIQUE,
     years_of_experience   INT,
+    date_of_birth         DATE,
     consultation_fee      NUMERIC(10,2) CHECK (consultation_fee >= 0),
     average_rating        NUMERIC(3,2)  DEFAULT 0.00 CHECK (average_rating BETWEEN 0 AND 5),
     total_reviews         INT           NOT NULL DEFAULT 0,
@@ -97,8 +98,9 @@ CREATE TABLE patients (
     city                  VARCHAR(100),
     state                 VARCHAR(100),
     pincode               VARCHAR(10),
-    created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    timezone              VARCHAR(50)   NOT NULL DEFAULT 'Asia/Kolkata',
+    created_at            TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+    updated_at            TIMESTAMPTZ   NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_patients_user_id ON patients (user_id);

@@ -1,9 +1,12 @@
-import { Link, NavLink, Outlet } from 'react-router-dom';
-import { Calendar, Home, LogOut, AlertCircle, ClipboardList, User } from 'lucide-react';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Calendar, Home, LogOut, AlertCircle, ClipboardList, User, Key } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import apiClient from '../api/apiClient';
 import { ENDPOINTS } from '../api/endpoints';
 import { cn } from '../lib/utils';
+import { useState } from 'react';
+import { ChangePasswordModal } from '../features/auth/components/ChangePasswordModal';
 
 const navItems = [
   { to: '/doctor/dashboard', icon: Home, label: 'Dashboard' },
@@ -12,6 +15,8 @@ const navItems = [
 
 export const DoctorLayout: React.FC = () => {
   const { user, logout } = useAuth();
+  const location = useLocation();
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   const handleConnectCalendar = async () => {
     try {
@@ -64,19 +69,28 @@ export const DoctorLayout: React.FC = () => {
               <p className="text-xs text-slate-400 truncate">{user?.email}</p>
             </div>
           </div>
-          <button
-            onClick={logout}
-            className="flex items-center gap-2 text-sm text-slate-400 hover:text-red-400 transition-colors"
-          >
-            <LogOut className="h-4 w-4" />
-            Sign out
-          </button>
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={() => setIsPasswordModalOpen(true)}
+              className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors"
+            >
+              <Key className="h-4 w-4" />
+              Change password
+            </button>
+            <button
+              onClick={logout}
+              className="flex items-center gap-2 text-sm text-slate-400 hover:text-red-400 transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
+              Sign out
+            </button>
+          </div>
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto relative bg-slate-950">
         {user?.googleCalendarConnected === false && (
-          <div className="bg-amber-500/10 border-b border-amber-500/20 px-8 py-3 flex items-center justify-between">
+          <div className="bg-amber-500/10 border-b border-amber-500/20 px-8 py-3 flex items-center justify-between z-20 relative">
             <div className="flex items-center gap-2 text-amber-500 text-sm">
               <AlertCircle className="h-4 w-4" />
               <span>Connect Google Calendar to automatically sync your appointments.</span>
@@ -89,10 +103,24 @@ export const DoctorLayout: React.FC = () => {
             </button>
           </div>
         )}
-        <div className="p-8">
-          <Outlet />
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.15 }}
+            className="p-8 h-full"
+          >
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
       </main>
+
+      <ChangePasswordModal 
+        isOpen={isPasswordModalOpen} 
+        onClose={() => setIsPasswordModalOpen(false)} 
+      />
     </div>
   );
 };

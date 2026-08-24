@@ -64,5 +64,4 @@ CREATE INDEX idx_post_visit_pending
 
 -- Prescription expiry scanner
 CREATE INDEX idx_prescriptions_active_range
-    ON prescriptions (start_date, end_date)
-    WHERE end_date >= CURRENT_DATE;
+    ON prescriptions (start_date, end_date);

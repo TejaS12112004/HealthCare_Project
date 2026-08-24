@@ -48,6 +48,7 @@ export interface Appointment {
 
 export interface Doctor {
   id: string;
+  userId: string;
   firstName: string;
   lastName: string;
   email: string;

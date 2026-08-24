@@ -6,9 +6,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { BrainCircuit, Calendar, ChevronDown, ChevronRight, Clock, Plus, Trash2, User } from 'lucide-react';
 import { useDoctorAppointment, useSubmitNotes } from './hooks/useDoctorAPI';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
+import { AsyncButton } from '../../components/ui/AsyncButton';
 import { Spinner } from '../../components/ui/Spinner';
+import { useToast } from '../../contexts/ToastContext';
 import { cn } from '../../lib/utils';
 
 const prescriptionSchema = z.object({
@@ -33,6 +36,7 @@ const PostVisitNotes: React.FC = () => {
 
   const { data: apt, isLoading } = useDoctorAppointment(id!);
   const { mutateAsync: submitNotes, isPending: isSubmitting } = useSubmitNotes();
+  const { toast } = useToast();
 
   const { register, control, handleSubmit, formState: { errors } } = useForm<NotesForm>({
     resolver: zodResolver(notesSchema),
@@ -57,10 +61,10 @@ const PostVisitNotes: React.FC = () => {
         }))
       };
       await submitNotes({ id: id!, ...payload });
-      alert('Notes saved successfully! Patient summary is generating.');
+      toast('Notes saved successfully! Patient summary is generating.', 'success');
       navigate('/doctor/dashboard');
     } catch (e) {
-      alert('Failed to save notes.');
+      toast('Failed to save notes.', 'error');
     }
   };
 
@@ -207,70 +211,81 @@ const PostVisitNotes: React.FC = () => {
                   <p className="text-sm text-slate-500 text-center py-6 border border-dashed border-slate-800 rounded-xl">No prescriptions added.</p>
                 ) : (
                   <div className="space-y-4">
-                    {fields.map((field, index) => (
-                      <div key={field.id} className="relative bg-slate-950 p-4 rounded-xl border border-slate-800 grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <button type="button" onClick={() => remove(index)} className="absolute top-3 right-3 text-slate-500 hover:text-red-400 transition-colors">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                        
-                        <div className="space-y-1">
-                          <label className="text-xs font-medium text-slate-400">Medication *</label>
-                          <input 
-                            className="w-full rounded border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" 
-                            {...register(`prescriptions.${index}.medicationName` as const)} 
-                          />
-                          {errors.prescriptions?.[index]?.medicationName && <p className="text-xs text-red-400">Required</p>}
-                        </div>
+                    <AnimatePresence initial={false}>
+                      {fields.map((field, index) => (
+                        <motion.div
+                          key={field.id}
+                          initial={{ opacity: 0, y: -20, height: 0 }}
+                          animate={{ opacity: 1, y: 0, height: 'auto' }}
+                          exit={{ opacity: 0, scale: 0.95, height: 0, marginBottom: 0, overflow: 'hidden' }}
+                          transition={{ duration: 0.2 }}
+                          className="relative bg-slate-950 p-4 rounded-xl border border-slate-800 grid grid-cols-1 md:grid-cols-2 gap-4"
+                        >
+                          <button type="button" onClick={() => remove(index)} className="absolute top-3 right-3 text-slate-500 hover:text-red-400 transition-colors">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                          
+                          <div className="space-y-1">
+                            <label className="text-xs font-medium text-slate-400">Medication *</label>
+                            <input 
+                              className="w-full rounded border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" 
+                              {...register(`prescriptions.${index}.medicationName` as const)} 
+                            />
+                            {errors.prescriptions?.[index]?.medicationName && <p className="text-xs text-red-400">Required</p>}
+                          </div>
 
-                        <div className="space-y-1">
-                          <label className="text-xs font-medium text-slate-400">Dosage *</label>
-                          <input 
-                            placeholder="e.g. 500mg"
-                            className="w-full rounded border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" 
-                            {...register(`prescriptions.${index}.dosage` as const)} 
-                          />
-                          {errors.prescriptions?.[index]?.dosage && <p className="text-xs text-red-400">Required</p>}
-                        </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-medium text-slate-400">Dosage *</label>
+                            <input 
+                              placeholder="e.g. 500mg"
+                              className="w-full rounded border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" 
+                              {...register(`prescriptions.${index}.dosage` as const)} 
+                            />
+                            {errors.prescriptions?.[index]?.dosage && <p className="text-xs text-red-400">Required</p>}
+                          </div>
 
-                        <div className="space-y-1">
-                          <label className="text-xs font-medium text-slate-400">Frequency *</label>
-                          <select 
-                            className="w-full rounded border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 h-[38px]" 
-                            {...register(`prescriptions.${index}.frequency` as const)}
-                          >
-                            <option value="ONCE_DAILY">Once Daily</option>
-                            <option value="TWICE_DAILY">Twice Daily</option>
-                            <option value="THRICE_DAILY">Thrice Daily</option>
-                          </select>
-                        </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-medium text-slate-400">Frequency *</label>
+                            <select 
+                              className="w-full rounded border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 h-[38px]" 
+                              {...register(`prescriptions.${index}.frequency` as const)}
+                            >
+                              <option value="ONCE_DAILY">Once Daily</option>
+                              <option value="TWICE_DAILY">Twice Daily</option>
+                              <option value="THRICE_DAILY">Thrice Daily</option>
+                            </select>
+                          </div>
 
-                        <div className="space-y-1">
-                          <label className="text-xs font-medium text-slate-400">Duration (Days) *</label>
-                          <input 
-                            type="number"
-                            className="w-full rounded border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" 
-                            {...register(`prescriptions.${index}.durationDays` as const)} 
-                          />
-                        </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-medium text-slate-400">Duration (Days) *</label>
+                            <input 
+                              type="number"
+                              className="w-full rounded border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" 
+                              {...register(`prescriptions.${index}.durationDays` as const)} 
+                            />
+                          </div>
 
-                        <div className="md:col-span-2 space-y-1">
-                          <label className="text-xs font-medium text-slate-400">Instructions (Optional)</label>
-                          <input 
-                            placeholder="e.g. Take after meals"
-                            className="w-full rounded border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" 
-                            {...register(`prescriptions.${index}.instructions` as const)} 
-                          />
-                        </div>
-                      </div>
-                    ))}
+                          <div className="md:col-span-2 space-y-1">
+                            <label className="text-xs font-medium text-slate-400">Instructions (Optional)</label>
+                            <input 
+                              placeholder="e.g. Take after meals"
+                              className="w-full rounded border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" 
+                              {...register(`prescriptions.${index}.instructions` as const)} 
+                            />
+                          </div>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                   </div>
                 )}
               </div>
 
               <div className="flex justify-end pt-4">
-                <Button type="submit" isLoading={isSubmitting} size="lg" className="w-full sm:w-auto">
-                  Submit Notes & Generate Patient Summary
-                </Button>
+                <div className="w-full sm:w-auto">
+                  <AsyncButton type="submit" isLoading={isSubmitting} className="w-full">
+                    Submit Notes & Generate Patient Summary
+                  </AsyncButton>
+                </div>
               </div>
             </form>
           )}

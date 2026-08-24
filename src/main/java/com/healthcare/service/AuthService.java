@@ -2,6 +2,7 @@ package com.healthcare.service;
 
 import com.healthcare.exception.AppException;
 import com.healthcare.exception.ResourceNotFoundException;
+import com.healthcare.model.dto.request.ChangePasswordRequest;
 import com.healthcare.model.dto.request.LoginRequest;
 import com.healthcare.model.dto.request.RegisterRequest;
 import com.healthcare.model.dto.response.AuthResponse;
@@ -141,6 +142,22 @@ public class AuthService {
 
         log.info("Issuing new access token for: {}", user.getEmail());
         return buildAuthResponse(user, false);  // false = don't include refresh token in response
+    }
+
+    // ── Change Password ───────────────────────────────────────────────────────
+
+    @Transactional
+    public void changePassword(java.util.UUID userId, ChangePasswordRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPasswordHash())) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "Invalid old password");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+        log.info("Password changed for user: {}", user.getEmail());
     }
 
     // ── Logout ────────────────────────────────────────────────────────────────

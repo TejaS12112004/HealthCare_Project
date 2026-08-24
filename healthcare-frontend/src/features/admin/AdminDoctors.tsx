@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Edit2, Plus, PowerOff, UserX } from 'lucide-react';
-import { useAdminDoctors, useCreateDoctor, useUpdateDoctor, useDeactivateDoctor } from './hooks/useAdminAPI';
+import { useAdminDoctors, useCreateDoctor, useUpdateDoctor, useDeactivateDoctor, useActivateDoctor } from './hooks/useAdminAPI';
 import { AdminDoctorForm } from './AdminDoctorForm';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
@@ -16,6 +16,7 @@ export const AdminDoctors: React.FC = () => {
   const { mutateAsync: createDoctor, isPending: isCreating } = useCreateDoctor();
   const { mutateAsync: updateDoctor, isPending: isUpdating } = useUpdateDoctor();
   const { mutateAsync: deactivateDoctor } = useDeactivateDoctor();
+  const { mutateAsync: activateDoctor } = useActivateDoctor();
 
   const handleOpenModal = (doctor?: Doctor) => {
     setEditingDoctor(doctor || null);
@@ -31,22 +32,37 @@ export const AdminDoctors: React.FC = () => {
     try {
       if (editingDoctor) {
         await updateDoctor({ id: editingDoctor.id, ...data });
+        handleCloseModal();
       } else {
-        await createDoctor(data);
+        const response = await createDoctor(data);
+        handleCloseModal();
+        if (response?.tempPassword) {
+          alert(`Doctor created successfully!\n\nTemporary Password: ${response.tempPassword}\n\nPlease share this password with the doctor. They should change it upon first login.`);
+        } else {
+          alert('Doctor created successfully!');
+        }
       }
-      handleCloseModal();
     } catch (e) {
       alert('Failed to save doctor.');
     }
   };
 
   const handleToggleActive = async (doctor: Doctor) => {
-    if (!doctor.isActive) return; // Right now backend only supports DELETE (deactivate)
-    if (confirm(`Are you sure you want to deactivate Dr. ${doctor.lastName}?`)) {
-      try {
-        await deactivateDoctor(doctor.id);
-      } catch (e) {
-        alert('Failed to deactivate doctor.');
+    if (doctor.isActive) {
+      if (confirm(`Are you sure you want to deactivate Dr. ${doctor.lastName}?`)) {
+        try {
+          await deactivateDoctor(doctor.id);
+        } catch (e) {
+          alert('Failed to deactivate doctor.');
+        }
+      }
+    } else {
+      if (confirm(`Are you sure you want to activate Dr. ${doctor.lastName}?`)) {
+        try {
+          await activateDoctor(doctor.userId);
+        } catch (e) {
+          alert('Failed to activate doctor.');
+        }
       }
     }
   };
@@ -112,8 +128,12 @@ export const AdminDoctors: React.FC = () => {
                             <PowerOff className="h-4 w-4" />
                           </button>
                         ) : (
-                          <button disabled className="p-2 text-slate-600 rounded cursor-not-allowed">
-                            <UserX className="h-4 w-4" />
+                          <button 
+                            onClick={() => handleToggleActive(doc)}
+                            className="p-2 text-slate-400 hover:text-green-400 hover:bg-green-400/10 rounded transition-colors"
+                            title="Activate Doctor"
+                          >
+                            <PowerOff className="h-4 w-4" />
                           </button>
                         )}
                       </div>

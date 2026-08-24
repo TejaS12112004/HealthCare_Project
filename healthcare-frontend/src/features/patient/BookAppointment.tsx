@@ -6,7 +6,9 @@ import { z } from 'zod';
 import { format, parseISO } from 'date-fns';
 import { AlertCircle, Calendar, CheckCircle2, ChevronRight, Clock, Info } from 'lucide-react';
 import { useConfirmBooking, useDoctorSlots, useHoldSlot } from './hooks/usePatientAPI';
+import { motion } from 'framer-motion';
 import { Button } from '../../components/ui/Button';
+import { AsyncButton } from '../../components/ui/AsyncButton';
 import { Input } from '../../components/ui/Input';
 import { Spinner } from '../../components/ui/Spinner';
 import { cn } from '../../lib/utils';
@@ -15,7 +17,7 @@ import type { HoldResponse, Appointment, SlotResponse } from '../../types/appoin
 const symptomSchema = z.object({
   symptoms: z.string().min(5, 'Please describe your symptoms in detail'),
   durationDays: z.string().min(1, 'Required'),
-  severity: z.enum(['LOW', 'MEDIUM', 'HIGH']),
+  severity: z.enum(['MILD', 'MODERATE', 'SEVERE']),
   additionalNotes: z.string().optional(),
 });
 type SymptomForm = z.infer<typeof symptomSchema>;
@@ -35,7 +37,7 @@ const BookAppointment: React.FC = () => {
 
   const { register, handleSubmit, formState: { errors } } = useForm<SymptomForm>({
     resolver: zodResolver(symptomSchema),
-    defaultValues: { severity: 'LOW', durationDays: '1' },
+    defaultValues: { severity: 'MILD', durationDays: '1' },
   });
 
   // Hold Timer Logic
@@ -148,19 +150,21 @@ const BookAppointment: React.FC = () => {
           ) : slots?.length ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {slots.map((s: SlotResponse) => (
-                <button
+                <motion.button
                   key={s.slotTime}
+                  whileHover={s.isAvailable && !isHolding ? { scale: 1.05 } : {}}
+                  whileTap={s.isAvailable && !isHolding ? { scale: 0.97 } : {}}
                   disabled={!s.isAvailable || isHolding}
                   onClick={() => handleHold(s.slotTime)}
                   className={cn(
-                    "px-4 py-3 rounded-lg text-sm font-medium transition-all",
+                    "px-4 py-3 rounded-lg text-sm font-medium transition-colors",
                     s.isAvailable
                       ? "bg-slate-800 text-indigo-300 hover:bg-indigo-600 hover:text-white border border-slate-700 hover:border-indigo-500 cursor-pointer"
                       : "bg-slate-950 text-slate-600 border border-slate-900 cursor-not-allowed opacity-50"
                   )}
                 >
                   {format(parseISO(s.slotTime), 'h:mm a')}
-                </button>
+                </motion.button>
               ))}
             </div>
           ) : (
@@ -199,9 +203,9 @@ const BookAppointment: React.FC = () => {
                     className="rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 h-10"
                     {...register('severity')}
                   >
-                    <option value="LOW">Low / Mild</option>
-                    <option value="MEDIUM">Medium / Moderate</option>
-                    <option value="HIGH">High / Severe</option>
+                    <option value="MILD">Low / Mild</option>
+                    <option value="MODERATE">Medium / Moderate</option>
+                    <option value="SEVERE">High / Severe</option>
                   </select>
                 </div>
               </div>
@@ -241,9 +245,11 @@ const BookAppointment: React.FC = () => {
               </div>
             </div>
 
-            <Button type="submit" form="symptom-form" isLoading={isConfirming} className="w-full">
-              Confirm Booking
-            </Button>
+            <div className="w-full">
+              <AsyncButton type="submit" form="symptom-form" isLoading={isConfirming} className="w-full">
+                Confirm Booking
+              </AsyncButton>
+            </div>
           </div>
         </div>
       )}

@@ -19,5 +19,6 @@ public class SlotResponse {
     private LocalDateTime slotTime;
 
     /** {@code true} if the slot has not been booked and has no active hold. */
+    @com.fasterxml.jackson.annotation.JsonProperty("isAvailable")
     private boolean isAvailable;
 }
