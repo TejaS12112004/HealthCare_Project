@@ -11,7 +11,13 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-336791.svg?style=for-the-badge&logo=postgresql)](https://supabase.com/)
 [![Groq AI](https://img.shields.io/badge/AI-Groq-F55036.svg?style=for-the-badge&logo=groq)](https://groq.com/)
 
+[![Live Frontend](https://img.shields.io/badge/Live_Demo-Vercel-000000.svg?style=for-the-badge&logo=vercel)](https://wellpoint-healthcare-project-kgqv-eight.vercel.app)
+[![Spring Boot](https://img.shields.io/badge/Backend-Render-46E3B7.svg?style=for-the-badge&logo=render)](https://render.com)
+[![PostgreSQL](https://img.shields.io/badge/Database-Supabase-336791.svg?style=for-the-badge&logo=postgresql)](https://supabase.com/)
+
 *WellPoint is a comprehensive, beautifully designed clinic management system that bridges the gap between patients, doctors, and administrators using modern web technologies and AI.*
+
+🔗 **Live Frontend URL:** [https://wellpoint-healthcare-project-kgqv-eight.vercel.app](https://wellpoint-healthcare-project-kgqv-eight.vercel.app)
 
 [Explore Features](#sparkles-key-features) • [Installation](#gear-installation--setup) • [Architecture](#triangular_ruler-architecture) • [Screenshots](#camera-gallery)
 
