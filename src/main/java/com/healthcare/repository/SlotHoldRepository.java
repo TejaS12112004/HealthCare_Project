@@ -58,4 +58,14 @@ public interface SlotHoldRepository extends JpaRepository<SlotHold, UUID> {
             @Param("from")      LocalDateTime from,
             @Param("to")        LocalDateTime to,
             @Param("now")       LocalDateTime now);
+
+    @Query("""
+           SELECT (COUNT(sh) > 0) FROM SlotHold sh
+           WHERE sh.patient.id = :patientId
+           AND sh.isReleased = false
+           AND sh.expiresAt > :now
+           """)
+    boolean hasActiveHoldForPatient(
+            @Param("patientId") UUID patientId,
+            @Param("now") LocalDateTime now);
 }

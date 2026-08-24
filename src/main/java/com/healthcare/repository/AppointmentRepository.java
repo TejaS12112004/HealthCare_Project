@@ -78,4 +78,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
     int bulkUpdateStatus(@Param("ids") List<UUID> ids,
                          @Param("status") AppointmentStatus status,
                          @Param("reason") String reason);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT a FROM Appointment a WHERE a.id = :id")
+    Optional<Appointment> findByIdForUpdate(@Param("id") UUID id);
 }
