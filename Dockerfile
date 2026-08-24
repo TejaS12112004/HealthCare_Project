@@ -1,16 +1,24 @@
-# Build stage
-FROM maven:3.9.5-eclipse-temurin-21-alpine AS build
+﻿# ---- Build Stage ----
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
-COPY pom.xml .
-# Cache maven dependencies
-RUN mvn dependency:go-offline -B
-COPY src ./src
-# Build the application
-RUN mvn clean package -DskipTests
 
-# Run stage
-FROM eclipse-temurin:21-jre-alpine
+# Copy pom and download deps first (layer cache)
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# Copy source and build
+COPY src ./src
+RUN mvn clean package -DskipTests -B
+
+# ---- Runtime Stage ----
+FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
-COPY --from=build /app/target/healthcare-*.jar app.jar
+
+# Copy the jar from build stage
+COPY --from=build /app/target/*.jar app.jar
+
+# Render injects PORT env var; Spring Boot reads SERVER_PORT
+ENV SERVER_PORT=8080
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+ENTRYPOINT [""java"", ""-jar"", ""app.jar""]
