@@ -28,9 +28,9 @@ export const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(
             id={inputId}
             type={inputType}
             className={cn(
-              'peer w-full h-14 rounded-xl border bg-transparent px-4 pt-4 pb-1 text-slate-900 transition-all duration-150',
+              'peer w-full h-14 rounded-xl border bg-transparent px-4 pt-4 pb-1 text-ink font-body transition-all duration-150',
               'focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent',
-              error ? 'border-red-400 focus:ring-red-500/50 focus:border-red-500' : 'border-slate-200 hover:border-slate-300',
+              error ? 'border-danger focus:ring-danger/50 focus:border-danger' : 'border-ink/10 hover:border-ink/20',
               className
             )}
             placeholder=" " // Required for peer-placeholder-shown
@@ -40,10 +40,10 @@ export const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(
           <label
             htmlFor={inputId}
             className={cn(
-              'absolute left-4 top-4 z-10 origin-[0] -translate-y-3 scale-75 transform text-slate-500 duration-150 pointer-events-none',
+              'absolute left-4 top-4 z-10 origin-[0] -translate-y-3 scale-75 transform font-body text-ink/50 duration-150 pointer-events-none',
               'peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100',
               'peer-focus:-translate-y-3 peer-focus:scale-75 peer-focus:text-accent',
-              error && 'text-red-500 peer-focus:text-red-500'
+              error && 'text-danger peer-focus:text-danger'
             )}
           >
             {label}
@@ -53,7 +53,7 @@ export const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-ink/40 hover:text-ink/70 focus:outline-none"
             >
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
@@ -76,7 +76,7 @@ export const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="text-xs text-red-500 mt-1.5 ml-1"
+              className="text-xs font-medium text-danger mt-1.5 ml-1"
             >
               {error}
             </motion.p>

@@ -132,7 +132,7 @@ const TimelineRow: React.FC<{
           className={cn(
             'block rounded-xl border transition-all duration-150 hover:-translate-y-0.5',
             isCurrent
-              ? 'border-accent/30 bg-accent/5 shadow-sm hover:shadow-md hover:border-accent/50'
+              ? 'border-accent/30 bg-accent/5 shadow-sm hover:shadow-soft hover:border-accent/50'
               : isPast
               ? 'border-ink/5 bg-surface opacity-65 hover:opacity-85 hover:border-ink/10'
               : 'border-ink/8 bg-surface hover:border-accent/25 hover:shadow-sm'

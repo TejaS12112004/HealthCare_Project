@@ -51,7 +51,7 @@ function dateLabel(iso: string) {
 /* ── Hero appointment card ── */
 const NextAppointmentHero: React.FC<{ appointment: Appointment }> = ({ appointment }) => (
   <Link to={`/patient/appointments/${appointment.id}`}>
-    <div className="relative rounded-xl overflow-hidden border border-accent/20 bg-gradient-to-br from-accent/8 via-surface to-surface hover:border-accent/40 transition-all duration-200 hover:shadow-md group cursor-pointer">
+    <div className="relative rounded-xl overflow-hidden border border-accent/20 bg-gradient-to-br from-accent/8 via-surface to-surface hover:border-accent/40 transition-all duration-200 hover:shadow-soft group cursor-pointer">
       {/* Top accent strip */}
       <div className="h-1 bg-gradient-to-r from-accent to-teal-400" />
       <div className="p-6">
@@ -134,7 +134,7 @@ interface QuickActionProps {
 }
 const QuickAction: React.FC<QuickActionProps> = ({ to, icon, title, subtitle, accent }) => (
   <Link to={to} className="block group">
-    <Card className={`flex items-center gap-4 hover:-translate-y-0.5 hover:shadow-md transition-all duration-150 ${accent ? 'border-accent/20 hover:border-accent/40' : 'hover:border-accent/20'}`}>
+    <Card className={`flex items-center gap-4 hover:-translate-y-0.5 hover:shadow-soft transition-all duration-150 ${accent ? 'border-accent/20 hover:border-accent/40' : 'hover:border-accent/20'}`}>
       <div className={`h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 ${accent ? 'bg-accent text-white' : 'bg-ink/5 text-ink/60 group-hover:bg-accent/10 group-hover:text-accent transition-colors'}`}>
         {icon}
       </div>

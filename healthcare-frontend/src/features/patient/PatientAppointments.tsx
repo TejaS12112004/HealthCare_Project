@@ -32,7 +32,7 @@ const AppointmentMobileCard: React.FC<{
   appointment: Appointment;
   onCancel?: (id: string) => void;
 }> = ({ appointment, onCancel }) => (
-  <Card className="transition-all hover:-translate-y-0.5 hover:border-accent/20 hover:shadow-md duration-150">
+  <Card className="transition-all hover:-translate-y-0.5 hover:border-accent/20 hover:shadow-soft duration-150">
     <div className="flex items-start justify-between mb-3">
       <div className="flex items-center gap-3">
         <div className="h-9 w-9 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0">

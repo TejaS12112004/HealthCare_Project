@@ -13,7 +13,7 @@ import type { Doctor } from '../../types/appointment';
 
 /* ─── Doctor card with hover-lift (no 3D tilt) ──────────────────────── */
 const DoctorCard: React.FC<{ doctor: Doctor }> = ({ doctor }) => (
-  <Card className="flex flex-col h-full hover:-translate-y-1 hover:border-accent/30 hover:shadow-md transition-all duration-150">
+  <Card className="flex flex-col h-full hover:-translate-y-1 hover:border-accent/30 hover:shadow-soft transition-all duration-150">
     {/* Avatar + name header */}
     <div className="flex items-center gap-4 mb-4">
       <div className="h-14 w-14 rounded-xl bg-bg border border-ink/5 flex items-center justify-center flex-shrink-0">
